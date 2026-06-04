@@ -1191,7 +1191,7 @@
                 グッズ被弾チェッカーはこちら
             </a>
             <a href="#" id="historyBtn" class="credit-link"
-                style="font-size: 0.85rem; color: var(--primary-color); font-weight: bold; text-decoration: underline;">発券履歴・印刷</a>
+                style="font-size: 0.85rem; color: var(--primary-color); font-weight: bold; text-decoration: underline;">発券履歴・PDF保存</a>
         </div>
 
         <div class="day-toggle">
@@ -1267,7 +1267,7 @@
             <div style="margin-top: 15px; text-align: center;">
                 <a href="#" id="openHistoryFromShare"
                     style="font-size: 0.9rem; color: var(--primary-color); text-decoration: underline; font-weight: bold;">▶
-                    発券履歴・印刷画面を開く</a>
+                    発券履歴・PDF保存画面を開く</a>
             </div>
         </div>
     </div>
@@ -1335,9 +1335,9 @@
     <div id="historyModal" class="modal-overlay">
         <div class="modal-content"
             style="max-width: 600px; width: 90%; height: 80vh; display: flex; flex-direction: column;">
-            <h3 style="margin-top: 0;">発券履歴・印刷</h3>
+            <h3 style="margin-top: 0;">発券履歴・PDF保存</h3>
             <p style="font-size: 0.8rem; color: #666; text-align: left;">
-                最近発券したバ券（最大8枚）が保存されています。チェックを入れて印刷ボタンを押すと、A4サイズの印刷用画面が開きます。</p>
+                最近発券したバ券（最大8枚）が保存されています。チェックを入れて印刷ボタンを押すと、A4サイズの印刷用PDFをダウンロードできます。</p>
 
             <div style="text-align: right; margin-top: 10px;">
                 <a href="#" id="selectAllHistoryBtn"
@@ -1352,7 +1352,7 @@
             <div style="display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
                 <button id="closeHistoryBtn" class="modal-btn cancel" style="padding: 10px 15px;">閉じる</button>
                 <button id="printSelectedBtn" class="modal-btn"
-                    style="background: #2e7d32; color: white; padding: 10px 15px;">チェックしたバ券を印刷</button>
+                    style="background: #2e7d32; color: white; padding: 10px 15px;">チェックしたバ券をPDF保存</button>
             </div>
         </div>
     </div>
@@ -2192,7 +2192,7 @@
         document.getElementById('printSelectedBtn').addEventListener('click', async () => {
             const selectedIds = Array.from(document.querySelectorAll('.history-checkbox:checked')).map(cb => cb.value);
             if (selectedIds.length === 0) {
-                showToast('印刷するバ券を選択してください');
+                showToast('印刷用PDFに含めるバ券を選択してください');
                 return;
             }
 
@@ -2347,7 +2347,7 @@
                 showToast('画像の生成にエラーが発生しました。');
             } finally {
                 printBtn.disabled = false;
-                printBtn.textContent = 'チェックしたバ券を印刷';
+                printBtn.textContent = 'チェックしたバ券をPDF保存';
             }
 
             if (imageUrls.length > 0) {
