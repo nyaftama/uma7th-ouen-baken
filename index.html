@@ -23,7 +23,8 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
     <style>
         :root {
             --primary-color: #2e7d32;
@@ -2195,20 +2196,11 @@
                 return;
             }
 
-            const printWin = window.open('', '_blank');
-            if (printWin) {
-                // 待っている間、真っ白だと不安なのでローディング画面を出しておく
-                printWin.document.write('<html><body style="text-align:center; padding-top:50px; font-family:sans-serif; background:#f0f0f0;"><h2>印刷用データを生成しています...<br>このままお待ちください。</h2></body></html>');
-                printWin.document.close();
-            } else {
-                showToast('ポップアップがブロックされました。ブラウザの設定で許可してください。');
-                return;
-            }
-
             const printBtn = document.getElementById('printSelectedBtn');
             printBtn.disabled = true;
-            printBtn.textContent = '画像生成中...';
-            showToast('印刷用データを生成しています。しばらくお待ちください...');
+            // 変更：テキストをPDF生成中に変更
+            printBtn.textContent = 'PDF生成中...';
+            showToast('印刷用PDFを生成しています。しばらくお待ちください...');
 
             const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
             const printTargets = history.filter(h => selectedIds.includes(h.id));
@@ -2359,124 +2351,71 @@
             }
 
             if (imageUrls.length > 0) {
-                openPrintWindowWithImages(printWin, imageUrls);
-            } else {
-                printWin.close();
+                generateAndDownloadPDF(imageUrls);
             }
         });
 
-        // 画像を使って印刷ウィンドウを開く関数
-        // ★ 変更1：引数に printWin を追加
-        function openPrintWindowWithImages(printWin, images) {
-            // 生成された画像の数だけ、トンボ付きの枠とimgタグを生成
-            let imagesHtml = '';
-            images.forEach(imgSrc => {
-                imagesHtml += `
-                    <div class="ticket-wrapper">
-                        <div class="trim tm-tl-h"></div><div class="trim tm-tl-v"></div>
-                        <div class="trim tm-tr-h"></div><div class="trim tm-tr-v"></div>
-                        <div class="trim tm-bl-h"></div><div class="trim tm-bl-v"></div>
-                        <div class="trim tm-br-h"></div><div class="trim tm-br-v"></div>
-                        <img src="${imgSrc}" class="print-img" />
-                    </div>
-                `;
+        // PDFを生成しダウンロード
+        function generateAndDownloadPDF(images) {
+            // jsPDFを初期化 (A4縦、単位はミリメートル)
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+            const ticketW = 85;
+            const ticketH = 54;
+            const gapX = 15; // 横の隙間
+            const gapY = 15; // 縦の隙間
+            const startX = (210 - (ticketW * 2 + gapX)) / 2; // A4幅(210)の中央に配置(12.5mm)
+            const startY = 20;
+
+            let currentX = startX;
+            let currentY = startY;
+            let countOnPage = 0;
+
+            images.forEach((imgSrc) => {
+                // 1ページに8枚（2列×4段）まで。それ以上は新しいページを追加
+                if (countOnPage >= 8) {
+                    doc.addPage();
+                    currentX = startX;
+                    currentY = startY;
+                    countOnPage = 0;
+                }
+
+                // トンボ（トリムマーク）の描画
+                doc.setDrawColor(0); // 黒色
+                doc.setLineWidth(0.2); // 極細の線
+                const x = currentX;
+                const y = currentY;
+
+                // 左上のトンボ
+                doc.line(x - 4, y, x, y);
+                doc.line(x, y - 4, x, y);
+                // 右上のトンボ
+                doc.line(x + ticketW, y, x + ticketW + 4, y);
+                doc.line(x + ticketW, y - 4, x + ticketW, y);
+                // 左下のトンボ
+                doc.line(x - 4, y + ticketH, x, y + ticketH);
+                doc.line(x, y + ticketH, x, y + ticketH + 4);
+                // 右下のトンボ
+                doc.line(x + ticketW, y + ticketH, x + ticketW + 4, y + ticketH);
+                doc.line(x + ticketW, y + ticketH, x + ticketW, y + ticketH + 4);
+
+                // 画像の配置 (アスペクト比を無視して 85x54mm に強制変形)
+                doc.addImage(imgSrc, 'PNG', x, y, ticketW, ticketH);
+
+                countOnPage++;
+                // 2列に並べるための座標計算
+                if (countOnPage % 2 === 1) {
+                    currentX += ticketW + gapX; // 次は右の列へ
+                } else {
+                    currentX = startX;          // 次は左の列に戻る
+                    currentY += ticketH + gapY; // 次の行へ下がる
+                }
             });
 
-            // ★ 変更2：すでに開いているウィンドウを書き込み可能な状態にする
-            printWin.document.open();
-
-            printWin.document.write(`
-                <html>
-                <head>
-                    <title>推しバ券 印刷・保存ページ</title>
-                    <style>
-                        @media print {
-                            @page { size: A4; margin: 0; }
-                            body { margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                            .no-print { display: none !important; }
-                        }
-                        body { background: #f0f0f0; padding: 10mm; font-family: sans-serif; color: #333; }
-                        .print-instructions {
-                            margin-bottom: 20px; background: #fff; padding: 20px;
-                            border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                        }
-                        .instructions-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-                        .instructions-header h2 { margin: 0; font-size: 1.3rem; }
-                        .print-btn {
-                            padding: 12px 24px; font-size: 1.1rem; font-weight: bold;
-                            background: #2e7d32; color: white; border: none; border-radius: 6px; cursor: pointer;
-                            box-shadow: 0 4px 6px rgba(46, 125, 50, 0.2);
-                        }
-                        .warning-text { color: #d32f2f; font-weight: bold; margin-bottom: 15px; }
-
-                        .help-details { border: 1px solid #ddd; border-radius: 6px; padding: 10px; background: #fafafa; }
-                        .help-details summary {
-                            font-weight: bold; cursor: pointer; list-style: none; outline: none;
-                            color: #1565c0; font-size: 1.05rem;
-                        }
-                        .help-details summary::-webkit-details-marker { display: none; }
-                        .help-details summary:hover { opacity: 0.8; }
-                        .help-content { margin-top: 15px; font-size: 0.9rem; line-height: 1.6; }
-                        .help-content h4 { margin: 10px 0 5px 0; color: #333; border-bottom: 2px solid #eee; padding-bottom: 3px; }
-                        .help-content ol { margin: 0 0 15px 0; padding-left: 20px; }
-                        .help-content li { margin-bottom: 4px; }
-                        .app-note { background: #e3f2fd; padding: 10px; border-radius: 4px; font-weight: bold; color: #0277bd; }
-
-                        .print-page { display: flex; flex-wrap: wrap; gap: 15mm; justify-content: flex-start; }
-                        .ticket-wrapper { position: relative; width: 85mm; height: 54mm; box-sizing: border-box; background: #fff; }
-                        .trim { position: absolute; background: #000; }
-                        .tm-tl-h { top: 0; left: -4mm; width: 4mm; height: 1px; }
-                        .tm-tl-v { top: -4mm; left: 0; width: 1px; height: 4mm; }
-                        .tm-tr-h { top: 0; right: -4mm; width: 4mm; height: 1px; }
-                        .tm-tr-v { top: -4mm; right: 0; width: 1px; height: 4mm; }
-                        .tm-bl-h { bottom: 0; left: -4mm; width: 4mm; height: 1px; }
-                        .tm-bl-v { bottom: -4mm; left: 0; width: 1px; height: 4mm; }
-                        .tm-br-h { bottom: 0; right: -4mm; width: 4mm; height: 1px; }
-                        .tm-br-v { bottom: -4mm; right: 0; width: 1px; height: 4mm; }
-                        .print-img { width: 100%; height: 100%; object-fit: fill; display: block; }
-                    </style>
-                </head>
-                <body>
-                    <div class="print-instructions no-print">
-                        <div class="instructions-header">
-                            <h2>印刷・保存プレビュー</h2>
-                            <button onclick="window.print()" class="print-btn">印刷ダイアログを開く</button>
-                        </div>
-                        <p class="warning-text">※バ券の境界線が分かりづらい場合は、印刷設定で「背景のグラフィック」をオンにしてください。</p>
-                        <details class="help-details">
-                            <summary>スマホでPDF保存・コンビニ印刷するには？ (タップで開く)</summary>
-                            <div class="help-content">
-                                <h4>【iPhone (Safari) の場合】</h4>
-                                <ol>
-                                    <li>上の「印刷ダイアログを開く」ボタンを押す</li>
-                                    <li>プレビュー画面を<b>ピンチアウト（2本指で拡大）</b>する</li>
-                                    <li>PDF化されるので、右上の共有ボタンから「ファイルに保存」するか、コンビニプリント用アプリへ直接送信します。</li>
-                                </ol>
-                                <h4>【Android (Chrome) の場合】</h4>
-                                <ol>
-                                    <li>上の「印刷ダイアログを開く」ボタンを押す</li>
-                                    <li>画面上部のプリンター選択欄から<b>「PDF形式で保存」</b>を選ぶ</li>
-                                    <li>PDFボタンを押してスマホ本体に保存後、コンビニプリント用アプリから読み込みます。</li>
-                                </ol>
-
-                                <div class="app-note">
-                                    <b>おすすめのコンビニ印刷アプリ</b><br>
-                                    ・セブンイレブン： 「netprint」<br>
-                                    ・ファミマ・ローソン等： 「ネットワークプリント」 または 「PrintSmash」
-                                </div>
-                            </div>
-                        </details>
-                    </div>
-                    <div class="print-page">
-                        ${imagesHtml}
-                    </div>
-                </body>
-                </html>
-            `);
-            printWin.document.close();
-
-            // 画像の読み込み完了を待ってから印刷ダイアログを自動で開く
-            // setTimeout(() => { printWin.print(); }, 800);
+            // PDFファイルとして直接保存（iPhoneの場合はダウンロード確認が出ます）
+            doc.save('oshi_baken.pdf');
+            showToast('PDFのダウンロードが完了しました！');
         }
 
         document.getElementById('shareCloseBtn').addEventListener('click', () => {
