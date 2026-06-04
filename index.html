@@ -2366,9 +2366,7 @@
         });
 
         // 画像を使って印刷ウィンドウを開く関数
-        // ★ 変更1：引数に printWin を追加
         function openPrintWindowWithImages(printWin, images) {
-            // 生成された画像の数だけ、トンボ付きの枠とimgタグを生成
             let imagesHtml = '';
             images.forEach(imgSrc => {
                 imagesHtml += `
@@ -2382,7 +2380,6 @@
                 `;
             });
 
-            // ★ 変更2：すでに開いているウィンドウを書き込み可能な状態にする
             printWin.document.open();
 
             printWin.document.write(`
@@ -2391,8 +2388,9 @@
                     <title>推しバ券 印刷・保存ページ</title>
                     <style>
                         @media print {
-                            @page { size: A4; margin: 0; }
-                            body { margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                            /* --- 変更：0だけでなく単位(mm)をつけ、!importantでSafariに強制する --- */
+                            @page { size: A4; margin: 0mm !important; }
+                            body { margin: 0mm !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
                             .no-print { display: none !important; }
                         }
                         body { background: #f0f0f0; padding: 10mm; font-family: sans-serif; color: #333; }
@@ -2443,24 +2441,31 @@
                             <button onclick="window.print()" class="print-btn">印刷ダイアログを開く</button>
                         </div>
                         <p class="warning-text">※バ券の境界線が分かりづらい場合は、印刷設定で「背景のグラフィック」をオンにしてください。</p>
-                        <details class="help-details">
-                            <summary>スマホでPDF保存・コンビニ印刷するには？ (タップで開く)</summary>
+                        <details class="help-details" open>
+                            <summary>Safari等で余白がおかしい場合・スマホでPDF保存するには？</summary>
                             <div class="help-content">
                                 <h4>【iPhone (Safari) の場合】</h4>
                                 <ol>
                                     <li>上の「印刷ダイアログを開く」ボタンを押す</li>
+                                    <li><b>「オプション」をタップし、「ヘッダとフッタ」をオフにする</b>（※大きな余白が消えます）</li>
                                     <li>プレビュー画面を<b>ピンチアウト（2本指で拡大）</b>する</li>
-                                    <li>PDF化されるので、右上の共有ボタンから「ファイルに保存」するか、コンビニプリント用アプリへ直接送信します。</li>
+                                    <li>PDF化されるので、右上の共有ボタンから「ファイルに保存」するか、アプリへ送信。</li>
+                                </ol>
+                                <h4>【Mac (Safari) の場合】</h4>
+                                <ol>
+                                    <li>上の「印刷ダイアログを開く」ボタンを押す</li>
+                                    <li>詳細設定を展開し、<b>「ヘッダとフッタをプリント」のチェックを外す</b></li>
+                                    <li>下部の「PDF」ボタンから保存する</li>
                                 </ol>
                                 <h4>【Android (Chrome) の場合】</h4>
                                 <ol>
                                     <li>上の「印刷ダイアログを開く」ボタンを押す</li>
                                     <li>画面上部のプリンター選択欄から<b>「PDF形式で保存」</b>を選ぶ</li>
-                                    <li>PDFボタンを押してスマホ本体に保存後、コンビニプリント用アプリから読み込みます。</li>
+                                    <li>「用紙サイズ：A4」になっていることを確認し、PDFボタンを押して保存。</li>
                                 </ol>
 
                                 <div class="app-note">
-                                    <b>おすすめのコンビニ印刷アプリ</b><br>
+                                    <b>💡 おすすめのコンビニ印刷アプリ</b><br>
                                     ・セブンイレブン： 「netprint」<br>
                                     ・ファミマ・ローソン等： 「ネットワークプリント」 または 「PrintSmash」
                                 </div>
@@ -2474,9 +2479,6 @@
                 </html>
             `);
             printWin.document.close();
-
-            // 画像の読み込み完了を待ってから印刷ダイアログを自動で開く
-            // setTimeout(() => { printWin.print(); }, 800);
         }
 
         document.getElementById('shareCloseBtn').addEventListener('click', () => {
