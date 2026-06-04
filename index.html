@@ -652,7 +652,6 @@
             display: flex;
             flex-direction: row;
             padding-left: 15px;
-            position: relative;
         }
 
         /* 券種 (単勝＋複勝) の縦長エリア */
@@ -815,7 +814,7 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s, transform 0.3s;
-            z-index: 1000;
+            z-index: 9999;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
@@ -873,6 +872,7 @@
             font-weight: bold;
             cursor: pointer;
             text-decoration: none;
+            height: 100%;
         }
 
         .modal-btn.cancel {
@@ -911,7 +911,7 @@
             flex-direction: row;
             justify-content: space-between;
             align-items: flex-start;
-            min-height: 134px;
+            min-height: 136px;
             gap: 15px;
         }
 
@@ -1064,6 +1064,94 @@
             padding-right: 5px;
         }
 
+        /* --- 履歴アイテムとカスタムチェックボックス --- */
+        .history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 12px 10px;
+            border-bottom: 1px dashed #ccc;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-info {
+            flex: 1;
+        }
+
+        .history-date {
+            font-size: 0.75rem;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .history-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #333;
+            line-height: 1.3;
+        }
+
+        .history-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .history-del-btn {
+            background: #ffebee;
+            color: #d32f2f;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        /* 押しやすい大きなチェックボックス */
+        .history-checkbox-wrapper {
+            position: relative;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .history-checkbox-wrapper input {
+            display: none;
+        }
+
+        .custom-checkbox {
+            width: 100%;
+            height: 100%;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            background: #fff;
+            box-sizing: border-box;
+            transition: all 0.1s;
+        }
+
+        .history-checkbox-wrapper input:checked+.custom-checkbox {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .history-checkbox-wrapper input:checked+.custom-checkbox::after {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 4px;
+            width: 8px;
+            height: 15px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            transform: rotate(45deg);
+        }
+
         @media screen and (max-width: 768px) {
             .item-card {
                 padding: 12px;
@@ -1085,9 +1173,9 @@
 
     <div class="container">
         <div class="header-meta">
-            <span class="version-text">v0.95(b)</span>
-            <a href="https://x.com/nyaftama" target="_blank" rel="noopener noreferrer" class="credit-link">
-                作った人: <strong>@nyaftama</strong>
+            <span class="version-text">v1.01</span>
+            <a href="https://x.com/nyaftama" target="_blank" rel="noopener noreferrer" class="credit-link">作った人:
+                <strong>@nyaftama</strong>
             </a>
         </div>
 
@@ -1096,11 +1184,13 @@
             推しバ券メーカー
         </h1>
         <div class="eng-title">UMAMUSUME 7TH EVENT OSHI BAKEN MAKER</div>
-        <div style="padding: 0 10px; margin-bottom: 10px;">
+        <div style="padding: 0 10px; margin-bottom: 10px; display: flex; gap: 15px; align-items: center;">
             <a href="https://nyaftama.github.io/uma7th-item-search/" target="_blank"
                 style="font-size: 0.85rem; color: var(--primary-color); font-weight: bold; text-decoration: underline;">
                 グッズ被弾チェッカーはこちら
             </a>
+            <a href="#" id="historyBtn" class="credit-link"
+                style="font-size: 0.85rem; color: var(--primary-color); font-weight: bold; text-decoration: underline;">発券履歴・印刷</a>
         </div>
 
         <div class="day-toggle">
@@ -1173,6 +1263,11 @@
                     Xでシェア
                 </a>
             </div>
+            <div style="margin-top: 15px; text-align: center;">
+                <a href="#" id="openHistoryFromShare"
+                    style="font-size: 0.9rem; color: var(--primary-color); text-decoration: underline; font-weight: bold;">▶
+                    発券履歴・印刷画面を開く</a>
+            </div>
         </div>
     </div>
 
@@ -1234,6 +1329,32 @@
     </div>
 
     <div id="toast" class="toast"></div>
+
+    <!-- 履歴・印刷用モーダル -->
+    <div id="historyModal" class="modal-overlay">
+        <div class="modal-content"
+            style="max-width: 600px; width: 90%; height: 80vh; display: flex; flex-direction: column;">
+            <h3 style="margin-top: 0;">発券履歴・印刷</h3>
+            <p style="font-size: 0.8rem; color: #666; text-align: left;">
+                最近発券したバ券（最大8枚）が保存されています。チェックを入れて印刷ボタンを押すと、A4サイズの印刷用画面が開きます。</p>
+
+            <div style="text-align: right; margin-top: 10px;">
+                <a href="#" id="selectAllHistoryBtn"
+                    style="font-size: 0.85rem; color: var(--primary-color); text-decoration: underline; font-weight: bold;">すべて選択
+                    / 解除</a>
+            </div>
+
+            <div id="historyList"
+                style="flex: 1; overflow-y: auto; text-align: left; margin: 5px 0 15px 0; border: 1px solid #eee; padding: 10px; border-radius: 8px;">
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
+                <button id="closeHistoryBtn" class="modal-btn cancel" style="padding: 10px 15px;">閉じる</button>
+                <button id="printSelectedBtn" class="modal-btn"
+                    style="background: #2e7d32; color: white; padding: 10px 15px;">チェックしたバ券を印刷</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         const castCsvPath = './cast_list.csv';
@@ -1346,7 +1467,7 @@
             showToast(`${rowData.cast_name} を追加しました`);
         }
 
-        // --- 汎用トースト通知関数 ---
+        // 汎用トースト通知関数
         let toastTimeout;
         function showToast(msg, duration = 2500) {
             const toast = document.getElementById('toast');
@@ -1356,7 +1477,7 @@
             toastTimeout = setTimeout(() => toast.classList.remove('show'), duration);
         }
 
-        // --- 連打判定用の変数 ---
+        // 連打判定用の変数
         let rapidClickCount = 0;
         let lastClickTime = 0;
         let hasShownLongPressHint = false;
@@ -1612,7 +1733,6 @@
                 const leftDiv = document.createElement('div');
                 leftDiv.className = 'card-left';
 
-                // --- 変更：左カラムを「情報」と「リンク」で上下分割するレイアウト ---
                 const infoTopDiv = document.createElement('div');
                 infoTopDiv.className = 'card-info-top';
 
@@ -1664,18 +1784,22 @@
                 const addCartLink = document.createElement('div');
                 addCartLink.className = 'add-cart-link';
                 addCartLink.innerHTML = `＋ 組み合わせに追加`;
+                addCartLink.style.alignSelf = 'flex-start';
+                addCartLink.style.width = 'fit-content';
+                addCartLink.style.display = 'inline-block';
                 addCartLink.addEventListener('click', () => addToCart(row));
 
                 leftDiv.style.display = 'flex';
                 leftDiv.style.flexDirection = 'column';
                 leftDiv.style.justifyContent = 'space-between';
                 leftDiv.style.height = '100%';
+                leftDiv.style.alignItems = 'flex-start';
+                infoTopDiv.style.width = '100%';
 
                 leftDiv.appendChild(infoTopDiv);
                 leftDiv.appendChild(addCartLink);
 
                 card.appendChild(leftDiv);
-                // ---------------------------------------------------------------
 
                 const rightDiv = document.createElement('div');
                 rightDiv.className = 'card-right';
@@ -1823,8 +1947,7 @@
 
             document.getElementById('bkVal').textContent = amount;
 
-            // --- 金額エリアの縮小処理 ---
-            // --- 金額エリアの縮小処理 ---
+            // 金額エリアの縮小処理
             const amountRow = document.querySelector('.bk-amount-row');
             const totalRow = document.querySelector('.bk-total-row');
 
@@ -1833,7 +1956,7 @@
                 if (amountRow) {
                     amountRow.style.transform = 'scale(0.85)';
                     amountRow.style.transformOrigin = 'right bottom';
-                    amountRow.style.marginBottom = '-10px'; // ★追加: 各○○と合計○○の間隔を詰める
+                    amountRow.style.marginBottom = '-10px';
                 }
                 if (totalRow) {
                     totalRow.style.transform = 'scale(0.85)';
@@ -1852,7 +1975,7 @@
             document.getElementById('bkTotalVal').textContent = totalAmount;
             document.getElementById('bkStarsTotal').textContent = getStars(totalAmount, true);
 
-            // --- 名前エリアのレンダリング分岐 ---
+            // 名前エリアのレンダリング分岐
             if (isMulti) {
                 // 複数人（ウマ連・3連複）の場合
                 let multiHtml = `<div class="multi-names-container">`;
@@ -1948,17 +2071,407 @@
                 const tweetText = `有明アリーナ ウマ娘7th EVENT\n推しバ券を発券しました！\n\n${castNamesText}、がんばれ！\n\n#ウマ娘7th #推しバ券メーカー\nhttps://nyaftama.github.io/uma7th-ouen-baken/`;
                 document.getElementById('shareTwitterBtn').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
 
+                // 発券が成功したら履歴に保存する
+                saveHistory(betType, data, amount, totalAmount);
+
+                shareModal.classList.add('show');
+
             } catch (error) {
                 console.error('画像生成エラー:', error);
                 shareImageLoading.innerText = '推しバ券の生成に失敗しました。';
             }
         }
 
+        // =========================================
+        // 発券履歴と印刷（トンボ付きPDF出力）の処理
+        // =========================================
+        const HISTORY_KEY = 'uma_baken_history';
+
+        // 履歴の保存（ボックス買いを見据えて combinations 配列として保存）
+        function saveHistory(betType, data, amount, totalAmount) {
+            let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            const newEntry = {
+                id: 'baken_' + Date.now(),
+                date: new Date().toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                betType: betType,
+                combinations: [data], // 将来ボックス買いの時は [data1, data2...] となる
+                amount: amount,
+                totalAmount: totalAmount
+            };
+            history.unshift(newEntry);
+
+            // 最大8枚になるように古いものを削除
+            let totalTickets = 0;
+            const trimmedHistory = [];
+            for (const entry of history) {
+                if (totalTickets + entry.combinations.length <= 8) {
+                    trimmedHistory.push(entry);
+                    totalTickets += entry.combinations.length;
+                } else {
+                    break;
+                }
+            }
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(trimmedHistory));
+        }
+
+        // 履歴モーダルの表示
+        const historyModal = document.getElementById('historyModal');
+        const historyList = document.getElementById('historyList');
+
+        document.getElementById('historyBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            renderHistoryList();
+            historyModal.classList.add('show');
+        });
+
+        document.getElementById('closeHistoryBtn').addEventListener('click', () => {
+            historyModal.classList.remove('show');
+        });
+
+        function renderHistoryList() {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            historyList.innerHTML = '';
+
+            if (history.length === 0) {
+                historyList.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">履歴がありません</div>';
+                return;
+            }
+
+            history.forEach(entry => {
+                let nameStr = '';
+                if (Array.isArray(entry.combinations[0])) {
+                    nameStr = entry.combinations[0].map(r => r.cast_name).join('・');
+                } else {
+                    nameStr = entry.combinations[0].cast_name;
+                }
+
+                // 変更：応援バ券の分岐を追加
+                let typeStr = '';
+                if (entry.betType === 'tansho') typeStr = '単勝';
+                else if (entry.betType === 'ouen') typeStr = '応援(単＋複)';
+                else if (entry.betType === 'umaren') typeStr = 'ウマ連';
+                else if (entry.betType === 'sanrenpuku') typeStr = '3連複';
+
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <button class="history-del-btn" data-id="${entry.id}">削除</button>
+                    <div class="history-info" style="margin-left: 5px;">
+                        <div class="history-date">${entry.date} 発券</div>
+                        <div class="history-title">${typeStr}：${nameStr}</div>
+                    </div>
+                    <label class="history-checkbox-wrapper">
+                        <input type="checkbox" class="history-checkbox" value="${entry.id}">
+                        <div class="custom-checkbox"></div>
+                    </label>
+                `;
+                historyList.appendChild(div);
+            });
+
+            document.querySelectorAll('.history-del-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.getAttribute('data-id');
+                    let hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+                    hist = hist.filter(h => h.id !== id);
+                    localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+                    renderHistoryList();
+                });
+            });
+        }
+
+        // 変更：「すべて選択」をトグルボタン化
+        let isAllSelected = false;
+        document.getElementById('selectAllHistoryBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            isAllSelected = !isAllSelected;
+            document.querySelectorAll('.history-checkbox').forEach(cb => cb.checked = isAllSelected);
+        });
+
+        // 印刷ボタンの処理
+        document.getElementById('printSelectedBtn').addEventListener('click', async () => {
+            const selectedIds = Array.from(document.querySelectorAll('.history-checkbox:checked')).map(cb => cb.value);
+            if (selectedIds.length === 0) {
+                showToast('印刷するバ券を選択してください');
+                return;
+            }
+
+            const printBtn = document.getElementById('printSelectedBtn');
+            printBtn.disabled = true;
+            printBtn.textContent = '画像生成中...';
+            showToast('印刷用データを生成しています。しばらくお待ちください...');
+
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            const printTargets = history.filter(h => selectedIds.includes(h.id));
+
+            const imageUrls = [];
+
+            // ★実際のバ券DOM（非表示状態）をそのまま使う
+            const bakenDOM = document.getElementById('bakenSlip');
+
+            try {
+                for (const target of printTargets) {
+                    for (const comboData of target.combinations) {
+
+                        // =========================================================
+                        // ここから generateTicket と全く同じDOM構築処理を実行
+                        // =========================================================
+                        const isMulti = Array.isArray(comboData);
+                        const firstData = isMulti ? comboData[0] : comboData;
+
+                        const cleanUmaName = (firstData.uma_name || '').replace('役', '').trim();
+
+                        const dateParts = firstData.event_date.split('/');
+                        const year = dateParts[0];
+                        const month = parseInt(dateParts[1], 10);
+                        const day = parseInt(dateParts[2], 10);
+
+                        document.getElementById('bkDate').textContent = `${year}年${month}月${day}日`;
+                        document.getElementById('bkDay').textContent = firstData.day;
+
+                        const now = new Date();
+                        const issueMonth = now.getMonth() + 1;
+                        const issueDate = now.getDate();
+                        document.getElementById('bkIssueDate').textContent = `${issueMonth}月${issueDate}日`;
+
+                        const bkBetTypeBox = document.getElementById('bkBetTypeBox');
+                        const bkMessage = document.getElementById('bkMessage');
+                        const bkNameArea = document.getElementById('bkNameArea');
+
+                        let totalAmount = target.amount;
+                        const betType = target.betType;
+
+                        if (betType === 'umaren') {
+                            bkBetTypeBox.innerHTML = `<div class="bk-small-en">QUINELLA</div><div class="bk-vert-text" style="margin: 15px 0;">ウマ連</div>`;
+                            bkMessage.style.display = 'none';
+                        } else if (betType === 'sanrenpuku') {
+                            bkBetTypeBox.innerHTML = `<div class="bk-small-en">TRIO</div><div class="bk-vert-text" style="margin: 15px 0;">３連複</div>`;
+                            bkMessage.style.display = 'none';
+                        } else if (betType === 'tansho') {
+                            bkBetTypeBox.innerHTML = `<div class="bk-small-en">WIN</div><div class="bk-vert-text" style="margin: 15px 0;">単<br>勝</div>`;
+                            bkMessage.style.display = 'block';
+                            bkMessage.textContent = '激推し';
+                            totalAmount = target.amount;
+                        } else {
+                            bkBetTypeBox.innerHTML = `<div class="bk-small-en">WIN</div><div class="bk-vert-text">単<br>勝</div><div class="bk-plus">＋</div><div class="bk-vert-text">複<br>勝</div><div class="bk-small-en">PLACE<br>SHOW</div>`;
+                            bkMessage.style.display = 'block';
+                            bkMessage.textContent = 'がんばれ！';
+                            totalAmount = target.amount * 2;
+                        }
+
+                        const getStars = (val, isTotal) => {
+                            const char = isTotal ? '★' : '☆';
+                            const targetLength = isTotal ? 7 : 6;
+                            const starCount = Math.max(0, targetLength - val.toString().length);
+                            return char.repeat(starCount);
+                        };
+
+                        document.getElementById('bkVal').textContent = target.amount;
+
+                        const amountRow = document.querySelector('.bk-amount-row');
+                        const totalRow = document.querySelector('.bk-total-row');
+
+                        if (isMulti) {
+                            if (amountRow) {
+                                amountRow.style.transform = 'scale(0.85)';
+                                amountRow.style.transformOrigin = 'right bottom';
+                                amountRow.style.marginBottom = '-10px';
+                            }
+                            if (totalRow) {
+                                totalRow.style.transform = 'scale(0.85)';
+                                totalRow.style.transformOrigin = 'right bottom';
+                            }
+                        } else {
+                            if (amountRow) {
+                                amountRow.style.transform = 'none';
+                                amountRow.style.marginBottom = '5px';
+                            }
+                            if (totalRow) totalRow.style.transform = 'none';
+                        }
+
+                        document.getElementById('bkStarsSub').textContent = getStars(target.amount, false);
+                        document.getElementById('bkTotalVal').textContent = totalAmount;
+                        document.getElementById('bkStarsTotal').textContent = getStars(totalAmount, true);
+
+                        if (isMulti) {
+                            let multiHtml = `<div class="multi-names-container">`;
+                            comboData.forEach(row => {
+                                const cleanName = (row.uma_name || '').replace('役', '').trim();
+                                multiHtml += `
+                                    <div class="multi-name-block">
+                                        <div class="multi-cast-row">
+                                            <div class="multi-horse-number">${row.uma_number}</div>
+                                            <div class="multi-cast-name">${row.cast_name}</div>
+                                        </div>
+                                        <div class="multi-uma-name">${cleanName}役</div>
+                                    </div>
+                                `;
+                            });
+                            multiHtml += `</div>`;
+                            bkNameArea.innerHTML = multiHtml;
+
+                            // ダミー要素の追加も通常生成と同様に合わせる
+                            const dummyCast = document.createElement('div');
+                            dummyCast.id = 'bkCast'; dummyCast.textContent = firstData.cast_name;
+                            const dummyName = document.createElement('div');
+                            dummyName.id = 'bkName'; dummyName.textContent = firstData.uma_name;
+                            dummyCast.style.display = 'none'; dummyName.style.display = 'none';
+                            bkNameArea.appendChild(dummyCast);
+                            bkNameArea.appendChild(dummyName);
+
+                        } else {
+                            const fontSize = firstData.cast_name.length > 8 ? '2.4rem' : '3.2rem';
+                            bkNameArea.innerHTML = `
+                                <div class="bk-cast-row">
+                                    <div id="bkNumber" class="bk-horse-number bk-tall">${firstData.uma_number}</div>
+                                    <div id="bkCast" class="bk-cast-name bk-tall" style="font-size: ${fontSize};">${firstData.cast_name}</div>
+                                </div>
+                                <div id="bkName" class="bk-uma-name bk-tall">${cleanUmaName}役</div>
+                            `;
+                        }
+
+                        // DOMへの反映を待つ
+                        await new Promise(resolve => setTimeout(resolve, 150));
+
+                        // ★通常の発券処理と全く同じ設定（scale: 3）で撮影
+                        const canvas = await html2canvas(bakenDOM, {
+                            scale: 3,
+                            backgroundColor: '#ffffff',
+                            useCORS: true,
+                            logging: false
+                        });
+                        imageUrls.push(canvas.toDataURL('image/png'));
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+                showToast('画像の生成にエラーが発生しました。');
+            } finally {
+                printBtn.disabled = false;
+                printBtn.textContent = 'チェックしたバ券を印刷';
+            }
+
+            if (imageUrls.length > 0) {
+                openPrintWindowWithImages(imageUrls);
+            }
+        });
+
+        // 画像を使って印刷ウィンドウを開く関数
+        function openPrintWindowWithImages(images) {
+            const printWin = window.open('', '_blank');
+
+            // 生成された画像の数だけ、トンボ付きの枠とimgタグを生成
+            let imagesHtml = '';
+            images.forEach(imgSrc => {
+                imagesHtml += `
+                    <div class="ticket-wrapper">
+                        <div class="trim tm-tl-h"></div><div class="trim tm-tl-v"></div>
+                        <div class="trim tm-tr-h"></div><div class="trim tm-tr-v"></div>
+                        <div class="trim tm-bl-h"></div><div class="trim tm-bl-v"></div>
+                        <div class="trim tm-br-h"></div><div class="trim tm-br-v"></div>
+                        <img src="${imgSrc}" class="print-img" />
+                    </div>
+                `;
+            });
+
+            printWin.document.write(`
+                <html>
+                <head>
+                    <title>推しバ券 印刷・保存ページ</title>
+                    <style>
+                        @media print {
+                            @page { size: A4; margin: 0; }
+                            body { margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                            .no-print { display: none !important; }
+                        }
+                        body { background: #f0f0f0; padding: 10mm; font-family: sans-serif; color: #333; }
+                        .print-instructions {
+                            margin-bottom: 20px; background: #fff; padding: 20px;
+                            border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                        }
+                        .instructions-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+                        .instructions-header h2 { margin: 0; font-size: 1.3rem; }
+                        .print-btn {
+                            padding: 12px 24px; font-size: 1.1rem; font-weight: bold;
+                            background: #2e7d32; color: white; border: none; border-radius: 6px; cursor: pointer;
+                            box-shadow: 0 4px 6px rgba(46, 125, 50, 0.2);
+                        }
+                        .warning-text { color: #d32f2f; font-weight: bold; margin-bottom: 15px; }
+
+                        .help-details { border: 1px solid #ddd; border-radius: 6px; padding: 10px; background: #fafafa; }
+                        .help-details summary {
+                            font-weight: bold; cursor: pointer; list-style: none; outline: none;
+                            color: #1565c0; font-size: 1.05rem;
+                        }
+                        .help-details summary::-webkit-details-marker { display: none; }
+                        .help-details summary:hover { opacity: 0.8; }
+                        .help-content { margin-top: 15px; font-size: 0.9rem; line-height: 1.6; }
+                        .help-content h4 { margin: 10px 0 5px 0; color: #333; border-bottom: 2px solid #eee; padding-bottom: 3px; }
+                        .help-content ol { margin: 0 0 15px 0; padding-left: 20px; }
+                        .help-content li { margin-bottom: 4px; }
+                        .app-note { background: #e3f2fd; padding: 10px; border-radius: 4px; font-weight: bold; color: #0277bd; }
+
+                        .print-page { display: flex; flex-wrap: wrap; gap: 15mm; justify-content: flex-start; }
+                        .ticket-wrapper { position: relative; width: 85mm; height: 54mm; box-sizing: border-box; background: #fff; }
+                        .trim { position: absolute; background: #000; }
+                        .tm-tl-h { top: 0; left: -4mm; width: 4mm; height: 1px; }
+                        .tm-tl-v { top: -4mm; left: 0; width: 1px; height: 4mm; }
+                        .tm-tr-h { top: 0; right: -4mm; width: 4mm; height: 1px; }
+                        .tm-tr-v { top: -4mm; right: 0; width: 1px; height: 4mm; }
+                        .tm-bl-h { bottom: 0; left: -4mm; width: 4mm; height: 1px; }
+                        .tm-bl-v { bottom: -4mm; left: 0; width: 1px; height: 4mm; }
+                        .tm-br-h { bottom: 0; right: -4mm; width: 4mm; height: 1px; }
+                        .tm-br-v { bottom: -4mm; right: 0; width: 1px; height: 4mm; }
+                        .print-img { width: 100%; height: 100%; object-fit: fill; display: block; }
+                    </style>
+                </head>
+                <body>
+                    <div class="print-instructions no-print">
+                        <div class="instructions-header">
+                            <h2>印刷・保存プレビュー</h2>
+                            <button onclick="window.print()" class="print-btn">印刷ダイアログを開く</button>
+                        </div>
+                        <p class="warning-text">※バ券の境界線が分かりづらい場合は、印刷設定で「背景のグラフィック」をオンにしてください。</p>
+                        <details class="help-details">
+                            <summary>スマホでPDF保存・コンビニ印刷するには？ (タップで開く)</summary>
+                            <div class="help-content">
+                                <h4>【iPhone (Safari) の場合】</h4>
+                                <ol>
+                                    <li>上の「印刷ダイアログを開く」ボタンを押す</li>
+                                    <li>プレビュー画面を<b>ピンチアウト（2本指で拡大）</b>する</li>
+                                    <li>PDF化されるので、右上の共有ボタンから「ファイルに保存」するか、コンビニプリント用アプリへ直接送信します。</li>
+                                </ol>
+                                <h4>【Android (Chrome) の場合】</h4>
+                                <ol>
+                                    <li>上の「印刷ダイアログを開く」ボタンを押す</li>
+                                    <li>画面上部のプリンター選択欄から<b>「PDF形式で保存」</b>を選ぶ</li>
+                                    <li>PDFボタンを押してスマホ本体に保存後、コンビニプリント用アプリから読み込みます。</li>
+                                </ol>
+
+                                <div class="app-note">
+                                    <b>おすすめのコンビニ印刷アプリ</b><br>
+                                    ・セブンイレブン： 「netprint」<br>
+                                    ・ファミマ・ローソン等： 「ネットワークプリント」 または 「PrintSmash」
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+                    <div class="print-page">
+                        ${imagesHtml}
+                    </div>
+                </body>
+                </html>
+            `);
+            printWin.document.close();
+
+            // 画像の読み込み完了を待ってから印刷ダイアログを自動で開く
+            // setTimeout(() => { printWin.print(); }, 800);
+        }
+
         document.getElementById('shareCloseBtn').addEventListener('click', () => {
             shareModal.classList.remove('show');
         });
 
-        // --- カート用イベントの紐付け ---
+        // カート用イベントの紐付け
         const updateCartQty = (newAmount) => {
             if (newAmount < 100) newAmount = 100;
             cartAmount = newAmount;
@@ -1979,6 +2492,14 @@
         document.getElementById('cartIssueBtn').addEventListener('click', () => {
             const betType = cartItems.length === 2 ? 'umaren' : 'sanrenpuku';
             generateTicket(cartItems, cartAmount, betType);
+        });
+
+        // 発券結果モーダルから「発券履歴・印刷」画面へ移動する処理
+        document.getElementById('openHistoryFromShare').addEventListener('click', (e) => {
+            e.preventDefault();
+            shareModal.classList.remove('show');
+            renderHistoryList();
+            historyModal.classList.add('show');
         });
     </script>
 
