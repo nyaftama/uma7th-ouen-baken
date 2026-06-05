@@ -2198,13 +2198,21 @@
 
             const printBtn = document.getElementById('printSelectedBtn');
             printBtn.disabled = true;
-            // 変更：テキストをPDF生成中に変更
             printBtn.textContent = 'PDF生成中...';
-            showToast('印刷用PDFを生成しています。しばらくお待ちください...');
 
             const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
             const printTargets = history.filter(h => selectedIds.includes(h.id));
             
+            // ★ 追加 1：生成するバ券の「総枚数」をあらかじめ計算しておく
+            let totalTickets = 0;
+            printTargets.forEach(target => {
+                totalTickets += target.combinations.length;
+            });
+            let processedTickets = 0;
+
+            // ★ 変更：初期表示を0%にし、途中で消えないよう表示時間を極端に長く(99999ms)しておく
+            showToast(`PDFデータを生成しています... (0%)`, 99999);
+
             const imageUrls = [];
             const bakenDOM = document.getElementById('bakenSlip');
 
@@ -2329,10 +2337,8 @@
                             `;
                         }
 
-                        // DOMへの反映を待つ
                         await new Promise(resolve => setTimeout(resolve, 150));
-
-                        // ★通常の発券処理と全く同じ設定（scale: 3）で撮影
+                        
                         const canvas = await html2canvas(bakenDOM, {
                             scale: 3,
                             backgroundColor: '#ffffff',
@@ -2340,14 +2346,21 @@
                             logging: false
                         });
                         imageUrls.push(canvas.toDataURL('image/png'));
+
+                        processedTickets++;
+                        const percent = Math.floor((processedTickets / totalTickets) * 100);
+                        showToast(`PDFデータを生成しています... (${percent}%)`, 99999);
                     }
                 }
+
+                showToast('PDFファイルを出力しています...', 99999);
+
             } catch (e) {
                 console.error(e);
-                showToast('画像の生成にエラーが発生しました。');
+                showToast('PDFの生成に失敗しました。');
             } finally {
                 printBtn.disabled = false;
-                printBtn.textContent = 'チェックしたバ券をPDF保存';
+                printBtn.textContent = 'PDF保存';
             }
 
             if (imageUrls.length > 0) {
