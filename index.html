@@ -1113,6 +1113,22 @@
             font-weight: bold;
         }
 
+        .history-reissue-btn {
+            background-color: #f1f8e9;
+            color: var(--primary-color);
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        .history-reissue-btn:hover {
+            opacity: 0.8;
+        }
+
         /* 押しやすい大きなチェックボックス */
         .history-checkbox-wrapper {
             position: relative;
@@ -1136,21 +1152,20 @@
             transition: all 0.1s;
         }
 
-        .history-checkbox-wrapper input:checked+.custom-checkbox {
-            background: var(--primary-color);
+        .history-checkbox-wrapper input:checked + .custom-checkbox {
+            background-color: var(--primary-color);
             border-color: var(--primary-color);
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>');
+            background-size: 80%;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
-        .history-checkbox-wrapper input:checked+.custom-checkbox::after {
-            content: '';
-            position: absolute;
-            left: 10px;
-            top: 4px;
-            width: 8px;
-            height: 15px;
-            border: solid white;
-            border-width: 0 3px 3px 0;
-            transform: rotate(45deg);
+        .history-checkbox-wrapper input:not(:checked) + .custom-checkbox {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23cccccc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>');
+            background-size: 80%;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         @font-face {
@@ -1220,7 +1235,7 @@
 
     <div class="container">
         <div class="header-meta">
-            <span class="version-text">v1.01-1</span>
+            <span class="version-text">v1.02</span>
             <a href="https://x.com/nyaftama" target="_blank" rel="noopener noreferrer" class="credit-link">作った人:
                 <strong>@nyaftama</strong>
             </a>
@@ -1391,10 +1406,9 @@
             <p style="font-size: 0.8rem; color: #666; text-align: left;">
                 最近発券したバ券（最大8枚）が保存されています。チェックを入れてPDF保存ボタンを押すと、A4サイズの印刷用PDFをダウンロードできます。</p>
 
-            <div style="text-align: right; margin-top: 10px;">
-                <a href="#" id="selectAllHistoryBtn"
-                    style="font-size: 0.85rem; color: var(--primary-color); text-decoration: underline; font-weight: bold;">すべて選択
-                    / 解除</a>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <a href="#" id="deleteAllHistoryBtn" style="color: #d32f2f; font-weight: bold; text-decoration: underline; font-size: 0.9rem;">すべて削除</a>
+                <a href="#" id="selectAllHistoryBtn" style="color: var(--primary-color); text-decoration: underline; font-size: 0.9rem; font-weight: bold;">すべて選択 / 解除</a>
             </div>
 
             <div id="historyList"
@@ -1939,7 +1953,7 @@
         const shareImagePreview = document.getElementById('shareImagePreview');
         const shareImageLoading = document.getElementById('shareImageLoading');
 
-        async function generateTicket(data, amount, betType) {
+        async function generateTicket(data, amount, betType, isReissue = false) {
             shareModal.classList.add('show');
             shareImageLoading.style.display = 'block';
             shareImagePreview.style.display = 'none';
@@ -2146,8 +2160,9 @@
                 const tweetText = `有明アリーナ ウマ娘7th EVENT\n推しバ券を発券しました！\n\n${castNamesText}、がんばれ！\n\n#ウマ娘7th #推しバ券メーカー\nhttps://nyaftama.github.io/uma7th-ouen-baken/`;
                 document.getElementById('shareTwitterBtn').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
 
-                // 発券が成功したら履歴に保存する
-                saveHistory(betType, data, amount, totalAmount);
+                if (!isReissue) {
+                    saveHistory(betType, data, amount, totalAmount);
+                }
 
                 shareModal.classList.add('show');
 
@@ -2220,7 +2235,6 @@
                     nameStr = entry.combinations[0].cast_name;
                 }
 
-                // 変更：応援バ券の分岐を追加
                 let typeStr = '';
                 if (entry.betType === 'tansho') typeStr = '単勝';
                 else if (entry.betType === 'ouen') typeStr = '応援(単＋複)';
@@ -2231,10 +2245,15 @@
                 div.className = 'history-item';
                 div.innerHTML = `
                     <button class="history-del-btn" data-id="${entry.id}">削除</button>
+                    
                     <div class="history-info" style="margin-left: 5px;">
-                        <div class="history-date">${entry.date} 発券</div>
+                        <div class="history-date" style="display: flex; align-items: center; gap: 10px;">
+                            <span>${entry.date} 発券</span>
+                            <a href="#" class="history-reissue-link" data-id="${entry.id}" style="color: var(--primary-color); font-weight: bold; text-decoration: underline; font-size: inherit;">再発券</a>
+                        </div>
                         <div class="history-title">${typeStr}：${nameStr}</div>
                     </div>
+                    
                     <label class="history-checkbox-wrapper">
                         <input type="checkbox" class="history-checkbox" value="${entry.id}">
                         <div class="custom-checkbox"></div>
@@ -2252,14 +2271,46 @@
                     renderHistoryList();
                 });
             });
+
+            document.querySelectorAll('.history-reissue-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault(); 
+                    const id = e.target.getAttribute('data-id');
+                    const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+                    const targetEntry = hist.find(h => h.id === id);
+                    
+                    if (targetEntry) {
+                        historyModal.classList.remove('show');
+                        generateTicket(targetEntry.combinations[0], targetEntry.amount, targetEntry.betType, true);
+                    }
+                });
+            });
         }
 
-        // 変更：「すべて選択」をトグルボタン化
+        // 「すべて選択」をトグルボタン化
         let isAllSelected = false;
         document.getElementById('selectAllHistoryBtn').addEventListener('click', (e) => {
             e.preventDefault();
             isAllSelected = !isAllSelected;
             document.querySelectorAll('.history-checkbox').forEach(cb => cb.checked = isAllSelected);
+        });
+
+        document.getElementById('deleteAllHistoryBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // 履歴が空の場合は何もしない
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            if (history.length === 0) {
+                showToast('削除する履歴がありません。');
+                return;
+            }
+            
+            // 誤操作防止の確認アラートを出す
+            if (confirm('すべての発券履歴を削除しますか？\n（この操作は取り消せません）')) {
+                localStorage.removeItem(HISTORY_KEY);
+                renderHistoryList();
+                showToast('すべての履歴を削除しました。');
+            }
         });
 
         // 印刷ボタンの処理
