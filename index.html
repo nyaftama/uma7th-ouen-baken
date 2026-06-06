@@ -24,7 +24,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
+
     <style>
         :root {
             --primary-color: #2e7d32;
@@ -1153,6 +1153,51 @@
             transform: rotate(45deg);
         }
 
+        @font-face {
+            font-family: 'UraLogoFont';
+            src: url('data:application/font-woff;charset=utf-8;base64,d09GRk9UVE8AAAeoAAoAAAAAB2AAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABDRkYyAAADcAAABBwAAAQcIGnpy09TLzIAAAFYAAAAYAAAAGAPEQzrY21hcAAAAvwAAABUAAAAVACXAJhnYXNwAAAHoAAAAAgAAAAIAAAAEGhlYWQAAAD0AAAANgAAADYvsh+haGhlYQAAASwAAAAkAAAAJAfCBCpobXR4AAAHjAAAABQAAAAUDgAAZG1heHAAAAFQAAAABgAAAAYABVAAbmFtZQAAAbgAAAFEAAABROguUPRwb3N0AAADUAAAACAAAAAgAAMAAAABAAAAAQAAw//ft18PPPUACwQAAAAAAOZJbZIAAAAA5kltkgBk/+IDnAOeAAAACAACAAAAAAAAAAEAAAPA/8AAAAQAAGQAZAOcAAEAAAAAAAAAAAAAAAAAAAAFAABQAAAFAAAAAwOAAZAABQAAApkCzAAAAI8CmQLMAAAB6wAzAQkAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAABAAAAAQQPA/8AAQAPAAEAAAAABAAAAAAAAAAAAAAAgAAAAAAAMAJYAAQAAAAAAAQAIACEAAQAAAAAAAgAHADkAAQAAAAAAAwAIAE4AAQAAAAAABAAQAH4AAQAAAAAABQALAAAAAQAAAAAABgAIAGYAAwABBAkAAQAQACkAAwABBAkAAgAOAEAAAwABBAkAAwAQAFYAAwABBAkABAAgAI4AAwABBAkABQAWAAsAAwABBAkABgAQAG5WZXJzaW9uIDEuMABWAGUAcgBzAGkAbwBuACAAMQAuADBVbnRpdGxlZABVAG4AdABpAHQAbABlAGRSZWd1bGFyAFIAZQBnAHUAbABhAHJVbnRpdGxlZABVAG4AdABpAHQAbABlAGRVbnRpdGxlZABVAG4AdABpAHQAbABlAGRVbnRpdGxlZCBSZWd1bGFyAFUAbgB0AGkAdABsAGUAZAAgAFIAZQBnAHUAbABhAHIAAAADAAAAAwAAABwAAQADAAAAHAADAAEAAAAcAAQAOAAAAAoACAACAAIAAAANACAAQf//AAAAAAANACAAQf//AAH/9f/j/8MAAQAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIABQAXHgoACXf/i4seCgAJd/+LiwwHqwwktREAAAAAAAAAAQEBBIu1EgAAAAUCAAEAAQABAAEAAQPi+I73BxWdLQWQc6Fxo4sI14oFmweKkneGe456j3+ZiJwIf8afjgWvkp2dka+OnYWhfZd/mH2Ueo8I+1QGjHcFlYyUho6BCI37UAWLhYOHh4kIf4UFevaYB4uUf4mGkYiOh5GLkAj3W8EHoYuggZR1knuIeX5/gYF/hX2LCPuh9wQVjHibhwWSiZKJj4QIijIFWwdnB4uDhIWFhnh8c4h0j3+NgI6AkYSQgJKLlQj3QgeOj46Nj4wIpJIFnvsBeweLh5qJi4QI+ysHi3mVe5mAm32eg5+HtYG3jbGfl5GWkpSVkZKTlIuVCIz3NwWNkZONkI2NkYuRiZAI+FJvFZhnlWiXZgigRgWQfY95f4sIb4oFiIuJiYuHCH7WBzn3lQU0Bl/7XQWJgoiEhoN+eXiai3wIfeUHm9AFlLGSsZKyjpuNnJGbjZCRjI+LkIqMh42GCPy57BVWtn2XBYiNh4+LkIqTkZKRkJKPkpKIjwh6qQV+on+hg6OGnYicjJ0IjJYFjamVqJuljI2Ni4yLjIuNiYyKCJBoBZBwmXScdgiUgwWRhZGFk4WGioWKhoxqmXizga2Lj4qNiIyJi4eLiogIhXAFiX+KgI2Ajm6og6aHgIKFfYx8jYuPi4yKj32WaJWOk42Qk4yTjp+BnpCcjZGSkZKJk4iTbY5+jIiNio2LjYuNjIuOCJWuBZOIk4uTipSKlIyViwiVjQWajZmOmJMIk5AFjY2LjYqNi46Ji4iLXo5hoHCufpyCnYeghK6QsJysm6mnnqWejY2NjYmOioyGi4mKCFF6BYqLio+MjAiVsY6fBcsHi4+GjYiMh4uHiomICD4qjEMFi4iIiYmLioqIjIqNebJwrW+rh5CHjYaJhYqJh4qFCIdEBYp5j3qWfQioZgWOiYmIiYl3c3lxf259aodsl2iXZ6hntIePhY+EioOKg3uLiIKJhoyGjoaUfZeAln+RhJKEkoUIwFoFlYKTh5eUmZSXlpaYCKmrBZWVmJSVg5t8g3KTfo+FnJmUk5+enp6eoJqcmJ2Wn5iikqSNppDEictvvHqneKJyoHOfcZxslICPgIx/iHiAWWiXeo2Jj4iPiwinBqSLo4ijhLGArnWlbaJwlmiIZ4Zad1xnaX19fIF5g3KAcpN4nAhycAV3dHd2dXeGhoaHhIgI+GT0FXyagZ6IoIeiiqGLowiMs4yZBZ0HjKqLqomriauEs3ajgJh8lHyTTqY6gUt7iIqJioqIi4iNiY2KCJuGBZOIkoiSiM5tuk+ZRAiWQwWSX5JdoWWdbLBvq3uyd7aCt4yOi42MjI+MjYqOiIxhl12cbasIAAAAAAQAAAAEAAAAAgAAAAQAAGQAAQAB//8ADw==') format('woff');
+        }
+
+        .bk-right-col {
+            position: relative;
+            z-index: 1;
+            --wm-size: 130px;
+            /* ロゴ自体の大きさ */
+            --wm-gap: 140px;
+            /* ロゴ同士の隙間（横・縦共通） */
+            --wm-start-y: -84px;
+            /* 全体の基準位置（上下） */
+            --wm-start-x: 0px;
+            /* 全体の基準位置（左右） */
+            --wm-step: calc(var(--wm-size) + var(--wm-gap));
+            /* 1マス分の全体サイズ */
+            --wm-offset: calc(var(--wm-step) / 2);
+            /* レンガ積みのズレ幅 */
+        }
+
+        .watermark-text {
+            position: absolute;
+            z-index: -1;
+            font-family: 'UraLogoFont', sans-serif;
+            color: #e2efdf;
+            font-size: var(--wm-size);
+            letter-spacing: var(--wm-gap);
+            line-height: var(--wm-step);
+            white-space: nowrap;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        .watermark-layer1 {
+            top: var(--wm-start-y);
+            left: var(--wm-start-x);
+        }
+
+        .watermark-layer2 {
+            top: calc(var(--wm-start-y) + var(--wm-offset));
+            left: calc(var(--wm-start-x) + var(--wm-offset));
+        }
+
         @media screen and (max-width: 768px) {
             .item-card {
                 padding: 12px;
@@ -1175,7 +1220,7 @@
 
     <div class="container">
         <div class="header-meta">
-            <span class="version-text">v1.01</span>
+            <span class="version-text">v1.01-1</span>
             <a href="https://x.com/nyaftama" target="_blank" rel="noopener noreferrer" class="credit-link">作った人:
                 <strong>@nyaftama</strong>
             </a>
@@ -1187,12 +1232,18 @@
         </h1>
         <div class="eng-title">UMAMUSUME 7TH EVENT OSHI BAKEN MAKER</div>
         <div style="padding: 0 10px; margin-bottom: 10px; display: flex; gap: 15px; align-items: center;">
+            <a href="#" id="historyBtn" class="credit-link"
+                style="font-size: 0.85rem; color: var(--primary-color); font-weight: bold; text-decoration: underline;">
+                発券履歴・PDF保存
+            </a>
+            <a href="#" class="credit-link" 
+                style="font-size: 0.85rem; color: #808080; font-weight: bold; text-decoration: underline;">
+                全員ver. (開発中)
+            </a>
             <a href="https://nyaftama.github.io/uma7th-item-search/" target="_blank"
                 style="font-size: 0.85rem; color: var(--primary-color); font-weight: bold; text-decoration: underline;">
-                グッズ被弾チェッカーはこちら
+                グッズ被弾チェッカー
             </a>
-            <a href="#" id="historyBtn" class="credit-link"
-                style="font-size: 0.85rem; color: var(--primary-color); font-weight: bold; text-decoration: underline;">発券履歴・PDF保存</a>
         </div>
 
         <div class="day-toggle">
@@ -2017,6 +2068,28 @@
                 `;
             }
 
+            const rightCol = document.querySelector('.bk-right-col');
+            if (rightCol) {
+                // 連続で発券した時に透かしが重なって濃くならないよう、前回追加した透かしがあれば一旦リセットする
+                const existingWatermarks = rightCol.querySelectorAll('.watermark-text');
+                existingWatermarks.forEach(el => el.remove());
+
+                // IcoMoonで割り当てた文字（例：'A'）を並べたテキストを作成
+                const patternText = 'AAA<br>AAA<br>AAA';
+
+                const watermark1 = document.createElement('div');
+                watermark1.className = 'watermark-text watermark-layer1';
+                watermark1.innerHTML = patternText;
+
+                const watermark2 = document.createElement('div');
+                watermark2.className = 'watermark-text watermark-layer2';
+                watermark2.innerHTML = patternText;
+
+                // 右カラムに透かしテキストを追加
+                rightCol.appendChild(watermark1);
+                rightCol.appendChild(watermark2);
+            }
+
             const bakenDOM = document.getElementById('bakenSlip');
 
             try {
@@ -2203,7 +2276,7 @@
 
             const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
             const printTargets = history.filter(h => selectedIds.includes(h.id));
-            
+
             // ★ 追加 1：生成するバ券の「総枚数」をあらかじめ計算しておく
             let totalTickets = 0;
             printTargets.forEach(target => {
@@ -2339,7 +2412,7 @@
                         }
 
                         await new Promise(resolve => setTimeout(resolve, 150));
-                        
+
                         const canvas = await html2canvas(bakenDOM, {
                             scale: 3,
                             backgroundColor: '#ffffff',
