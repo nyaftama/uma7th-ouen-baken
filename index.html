@@ -2462,6 +2462,24 @@
                             `;
                         }
 
+                        const rightCol = document.querySelector('.bk-right-col');
+                        if (rightCol) {
+                            const existingWatermarks = rightCol.querySelectorAll('.watermark-text');
+                            existingWatermarks.forEach(el => el.remove());
+
+                            const patternText = 'AAA<br>AAA<br>AAA';
+                            const watermark1 = document.createElement('div');
+                            watermark1.className = 'watermark-text watermark-layer1';
+                            watermark1.innerHTML = patternText;
+
+                            const watermark2 = document.createElement('div');
+                            watermark2.className = 'watermark-text watermark-layer2';
+                            watermark2.innerHTML = patternText;
+
+                            rightCol.appendChild(watermark1);
+                            rightCol.appendChild(watermark2);
+                        }
+
                         await new Promise(resolve => setTimeout(resolve, 150));
 
                         const canvas = await html2canvas(bakenDOM, {
