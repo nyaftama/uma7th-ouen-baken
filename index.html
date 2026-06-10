@@ -27,7 +27,7 @@
 
     <style>
         :root {
-            --primary-color: #2e7d32;
+            --primary-color: #ae0c0c;
             --bg-color: #f4f6f8;
         }
 
@@ -141,8 +141,9 @@
         }
 
         .day-label:has(input:checked) {
-            background: var(--primary-color);
-            color: white;
+            background: linear-gradient(135deg, #000000 75%, var(--primary-color) 25%);
+            color: #ffffff;
+
         }
 
         /* --- 検索ボックス --- */
@@ -463,8 +464,8 @@
 
         /* --- 発券ボタン --- */
         .issue-btn {
-            background-color: var(--primary-color);
-            color: white;
+            background: linear-gradient(135deg, #000000 75%, var(--primary-color) 25%);
+            color: #ffffff;
             border: none;
             border-radius: 6px;
             padding: 0 20px;
@@ -472,7 +473,7 @@
             font-size: 0.95rem;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            box-shadow: inset 0 0 0 2px var(--primary-color), 0 2px 4px rgba(0, 0, 0, 0.15);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -482,7 +483,7 @@
         }
 
         .issue-btn:hover {
-            background-color: #1b5e20;
+            background-color: #1a1a1a;
         }
 
         .issue-btn:active {
@@ -882,7 +883,8 @@
         }
 
         .modal-btn.twitter {
-            background: #000;
+            background: linear-gradient(135deg, #000000 75%, var(--primary-color) 25%);
+            box-shadow: inset 0 0 0 2px var(--primary-color), 0 2px 4px rgba(0, 0, 0, 0.15);
             color: white;
             display: flex;
             align-items: center;
@@ -1103,9 +1105,10 @@
         }
 
         .history-del-btn {
-            background: #ffebee;
-            color: #d32f2f;
+            background: linear-gradient(135deg, #000000 75%, var(--primary-color) 25%);
+            color: #ffffff;
             border: none;
+            box-shadow: inset 0 0 0 2px var(--primary-color);
             border-radius: 6px;
             padding: 8px 12px;
             cursor: pointer;
@@ -1124,7 +1127,7 @@
             font-weight: bold;
             white-space: nowrap;
         }
-        
+
         .history-reissue-btn:hover {
             opacity: 0.8;
         }
@@ -1152,7 +1155,7 @@
             transition: all 0.1s;
         }
 
-        .history-checkbox-wrapper input:checked + .custom-checkbox {
+        .history-checkbox-wrapper input:checked+.custom-checkbox {
             background-color: var(--primary-color);
             border-color: var(--primary-color);
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>');
@@ -1161,7 +1164,7 @@
             background-repeat: no-repeat;
         }
 
-        .history-checkbox-wrapper input:not(:checked) + .custom-checkbox {
+        .history-checkbox-wrapper input:not(:checked)+.custom-checkbox {
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23cccccc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>');
             background-size: 80%;
             background-position: center;
@@ -1235,7 +1238,7 @@
 
     <div class="container">
         <div class="header-meta">
-            <span class="version-text">v1.02</span>
+            <span class="version-text">v1.03</span>
             <a href="https://x.com/nyaftama" target="_blank" rel="noopener noreferrer" class="credit-link">作った人:
                 <strong>@nyaftama</strong>
             </a>
@@ -1246,12 +1249,13 @@
             <span class="sub-title">7th in TOKYO edition</span>
         </h1>
         <div class="eng-title">UMAMUSUME OSHI-BAKEN MAKER: 7th in tokyo Edition</div>
-        <div style="padding: 0 10px; margin-bottom: 10px; display: flex; flex-wrap: wrap; row-gap: 5px; column-gap: 15px; align-items: center;">
+        <div
+            style="padding: 0 10px; margin-bottom: 10px; display: flex; flex-wrap: wrap; row-gap: 5px; column-gap: 15px; align-items: center;">
             <a href="#" id="historyBtn" class="credit-link"
                 style="font-size: 0.85rem; color: var(--primary-color); font-weight: bold; text-decoration: underline;">
                 発券履歴・PDF保存
             </a>
-            <a href="https://nyaftama.github.io/uma-ouen-baken/" class="credit-link" 
+            <a href="https://nyaftama.github.io/uma-ouen-baken/" class="credit-link"
                 style="font-size: 0.85rem; color: var(--primary-color); font-weight: bold; text-decoration: underline;">
                 ALLSTAR edition (全キャラ)
             </a>
@@ -1407,8 +1411,11 @@
                 最近発券したバ券（最大8枚）が保存されています。チェックを入れてPDF保存ボタンを押すと、A4サイズの印刷用PDFをダウンロードできます。</p>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <a href="#" id="deleteAllHistoryBtn" style="color: #d32f2f; font-weight: bold; text-decoration: underline; font-size: 0.9rem;">すべて削除</a>
-                <a href="#" id="selectAllHistoryBtn" style="color: var(--primary-color); text-decoration: underline; font-size: 0.9rem; font-weight: bold;">すべて選択 / 解除</a>
+                <a href="#" id="deleteAllHistoryBtn"
+                    style="color: #000000; font-weight: bold; text-decoration: underline; font-size: 0.9rem;">すべて削除...</a>
+                <a href="#" id="selectAllHistoryBtn"
+                    style="color: var(--primary-color); text-decoration: underline; font-size: 0.9rem; font-weight: bold;">すべて選択
+                    / 解除</a>
             </div>
 
             <div id="historyList"
@@ -1418,7 +1425,7 @@
             <div style="display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
                 <button id="closeHistoryBtn" class="modal-btn cancel" style="padding: 10px 15px;">閉じる</button>
                 <button id="printSelectedBtn" class="modal-btn"
-                    style="background: #2e7d32; color: white; padding: 10px 15px;">PDF保存</button>
+                    style="background: linear-gradient(135deg, #000000 75%, var(--primary-color) 25%); color: #ffffff; box-shadow: inset 0 0 0 2px var(--primary-color); padding: 10px 15px;">PDF保存</button>
             </div>
         </div>
     </div>
@@ -2274,11 +2281,11 @@
 
             document.querySelectorAll('.history-reissue-link').forEach(link => {
                 link.addEventListener('click', (e) => {
-                    e.preventDefault(); 
+                    e.preventDefault();
                     const id = e.target.getAttribute('data-id');
                     const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
                     const targetEntry = hist.find(h => h.id === id);
-                    
+
                     if (targetEntry) {
                         historyModal.classList.remove('show');
                         generateTicket(targetEntry.combinations[0], targetEntry.amount, targetEntry.betType, true);
@@ -2297,14 +2304,14 @@
 
         document.getElementById('deleteAllHistoryBtn').addEventListener('click', (e) => {
             e.preventDefault();
-            
+
             // 履歴が空の場合は何もしない
             const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
             if (history.length === 0) {
                 showToast('削除する履歴がありません。');
                 return;
             }
-            
+
             // 誤操作防止の確認アラートを出す
             if (confirm('すべての発券履歴を削除しますか？\n（この操作は取り消せません）')) {
                 localStorage.removeItem(HISTORY_KEY);
