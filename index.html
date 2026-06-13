@@ -1246,7 +1246,7 @@
 
     <div class="container">
         <div class="header-meta">
-            <span class="version-text">v1.03</span>
+            <span class="version-text">v1.04</span>
             <a href="https://x.com/nyaftama" target="_blank" rel="noopener noreferrer" class="credit-link">作った人:
                 <strong>@nyaftama</strong>
             </a>
@@ -2498,12 +2498,12 @@
                         await new Promise(resolve => setTimeout(resolve, 150));
 
                         const canvas = await html2canvas(bakenDOM, {
-                            scale: 3,
+                            scale: 2,
                             backgroundColor: '#ffffff',
                             useCORS: true,
                             logging: false
                         });
-                        imageUrls.push(canvas.toDataURL('image/png'));
+                        imageUrls.push(canvas.toDataURL('image/jpeg', 0.85));
 
                         processedTickets++;
                         const percent = Math.floor((processedTickets / totalTickets) * 100);
@@ -2572,7 +2572,7 @@
                 doc.line(x + ticketW, y + ticketH, x + ticketW, y + ticketH + 4);
 
                 // 画像の配置 (アスペクト比を無視して 85x54mm に強制変形)
-                doc.addImage(imgSrc, 'PNG', x, y, ticketW, ticketH);
+                doc.addImage(imgSrc, 'JPEG', x, y, ticketW, ticketH);
 
                 countOnPage++;
                 // 2列に並べるための座標計算
