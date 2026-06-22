@@ -1246,7 +1246,7 @@
 
     <div class="container">
         <div class="header-meta">
-            <span class="version-text">v1.04a (2026/06/22)</span>
+            <span class="version-text">v<span id="version">1.04a</span></span>
             <a href="https://x.com/nyaftama" target="_blank" rel="noopener noreferrer" class="credit-link">作った人:
                 <strong>@nyaftama</strong>
             </a>
@@ -1437,8 +1437,9 @@
     </div>
 
     <script>
-        const castCsvPath = './cast_list.csv';
-        const colorCsvPath = './uma_list.csv';
+        const version = document.getElementById('version');
+        const castCsvPath = './cast_list.csv?v=' + versionText;
+        const colorCsvPath = './uma_list.csv?v=' + versionText;
 
         let allCastData = [];
         let colorMap = {};
