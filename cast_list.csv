@@ -25,6 +25,7 @@ day,event_date,uma_number,cast_name_eng,uma_name_eng,cast_name,uma_name,is_guest
 1,2026/06/20,24,Hikari Senga,Epiphaneia,千賀光莉,エピファネイア役,FALSE
 1,2026/06/20,25,Hana Shimano,Victoire Pisa,嶋野花,ヴィクトワールピサ役,FALSE
 1,2026/06/20,26,Satomi Akesaka,Misato Akasaka,明坂聡美,赤坂美聡役,FALSE
+1,2026/06/20,27,AIMI,Casino Drive,愛美,カジノドライヴ役,TRUE
 2,2026/06/21,1,Hitomi Ueda,Gold Ship,上田瞳,ゴールドシップ役,FALSE
 2,2026/06/21,2,Chinami Hashimoto,Fine Motion,橋本ちなみ,ファインモーション役,FALSE
 2,2026/06/21,3,Ayami Fujino,Eishin Flash,藤野彩水,エイシンフラッシュ役,FALSE
@@ -52,3 +53,4 @@ day,event_date,uma_number,cast_name_eng,uma_name_eng,cast_name,uma_name,is_guest
 2,2026/06/21,25,Mizutama Umino,Rulership,海野水玉,ルーラーシップ役,FALSE
 2,2026/06/21,26,Satomi Akesaka,Misato Akasaka,明坂聡美,赤坂美聡役,FALSE
 2,2026/06/21,27,Yu Serizawa,Gentildonna,芹澤優,ジェンティルドンナ役,TRUE
+2,2026/06/21,28,Yui Kanari,Titleholder,華成結,タイトルホルダー役,TRUE
