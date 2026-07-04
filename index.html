@@ -1,0 +1,2625 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2RNJ72H75W"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-2RNJ72H75W');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ウマ娘 推しバ券メーカー 7th in TOKYO edition</title>
+    <meta name="description" content="ウマ娘 7th EVENT向けの非公式応援ツールです。あなただけのオリジナル「推しバ券」を発券してみましょう。">
+
+    <meta property="og:title" content="ウマ娘 推しバ券メーカー 7th in TOKYO edition">
+    <meta property="og:description" content="ウマ娘 7th EVENT向けの非公式応援ツールです。あなただけのオリジナル「推しバ券」を発券してみましょう。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://nyaftama.github.io/uma7th-ouen-baken/">
+    <meta property="og:image" content="https://nyaftama.github.io/uma7th-ouen-baken/ogp_image.png">
+    <meta property="og:site_name" content="推しバ券メーカー">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Noto+Serif+JP:wght@700;900&display=swap"
+        rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #ae0c0c;
+            --bg-color: #f4f6f8;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: var(--bg-color);
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: transparent;
+            padding-bottom: 80px;
+        }
+
+        /* --- ヘッダー領域 --- */
+        .header-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 10px;
+            margin-bottom: 10px;
+        }
+
+        .version-text {
+            font-size: 0.85rem;
+            color: #888;
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        .credit-link {
+            font-size: 0.75rem;
+            color: #777;
+            text-decoration: none;
+        }
+
+        .credit-link strong {
+            color: #555;
+        }
+
+        .credit-link:hover {
+            text-decoration: underline;
+            color: var(--primary-color);
+        }
+
+        h1.main-title {
+            font-size: 1.4rem;
+            margin: 0;
+            padding: 0 10px;
+            line-height: 1.3;
+            color: var(--primary-color);
+        }
+
+        .main-title .sub-title {
+            font-size: 0.75em;
+            color: #555;
+        }
+
+        .eng-title {
+            font-size: 0.65rem;
+            color: #b0b0b0;
+            text-transform: uppercase;
+            padding: 0 10px;
+            margin-top: 4px;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        .other-day-link {
+            display: inline-block;
+            margin-top: 5px;
+            font-size: 0.8rem;
+            color: var(--primary-color);
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .other-day-link:hover {
+            opacity: 0.7;
+        }
+
+        /* --- DAY選択トグル --- */
+        .day-toggle {
+            display: flex;
+            margin: 0 10px 15px 10px;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #ddd;
+        }
+
+        .day-label {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #666;
+            background: #f9f9f9;
+        }
+
+        .day-label input {
+            display: none;
+        }
+
+        .day-label:has(input:checked) {
+            background: linear-gradient(135deg, #000000 75%, var(--primary-color) 25%);
+            color: #ffffff;
+
+        }
+
+        /* --- 検索ボックス --- */
+        .search-box {
+            position: relative;
+            margin-bottom: 15px;
+            padding: 0 10px;
+            z-index: 150;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px;
+            padding-right: 40px;
+            font-size: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            background-color: #fff;
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .clear-input-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #999;
+            cursor: pointer;
+            display: none;
+            padding: 0 5px;
+            touch-action: manipulation;
+        }
+
+        .clear-input-btn:hover {
+            color: #555;
+        }
+
+        /* --- サジェスト --- */
+        .suggestions-box {
+            position: absolute;
+            top: 100%;
+            left: 10px;
+            right: 10px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .suggestion-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-item:hover,
+        .suggestion-item:active {
+            background-color: #f5f5f5;
+        }
+
+        .suggestion-icon-svg {
+            margin-right: 10px;
+            color: #666;
+            opacity: 0.7;
+        }
+
+        .suggestion-day-label {
+            font-size: 0.75rem;
+            color: #666;
+            border: 1px solid #666;
+            padding: 2px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        /* --- バッジ --- */
+        .badges-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+
+        .uma-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-shadow: 0px 1px 3px rgba(0, 0, 0, 0.9);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            white-space: nowrap;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        .guest-badge {
+            border: 1.5px solid #ff9800;
+            color: #ff9800;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            background: transparent;
+        }
+
+        /* --- アイテムカード --- */
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 0 10px;
+        }
+
+        .item-card {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 15px;
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+        }
+
+        .item-card.checked-row {
+            background-color: #f1f8e9;
+            border-color: #a5d6a7;
+        }
+
+        /* 左カラム */
+        .card-left {
+            flex: 1;
+            width: auto;
+        }
+
+        .cast-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            line-height: 1.4;
+            color: #222;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .uma-number-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 22px;
+            height: 22px;
+            padding: 0 4px;
+            border: 2px solid #333;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .cast-name-eng {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        /* 右カラム */
+        .card-right {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* --- 金額カウンターエリア --- */
+        .amount-control-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .qty-main-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 5px;
+            width: 100%;
+        }
+
+        .qty-btn {
+            width: 40px;
+            height: 40px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #333;
+            background-color: #f8f9fa;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+            flex-shrink: 0;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        .qty-btn:active {
+            transform: scale(0.95);
+            background-color: #e0e0e0;
+        }
+
+        .qty-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .qty-display {
+            width: 70px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            text-align: center;
+            color: var(--primary-color);
+            display: inline-block;
+            transform: scaleX(0.9);
+            transform-origin: center;
+        }
+
+        .qty-sub-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 5px;
+            width: 100%;
+        }
+
+        .qty-btn-small {
+            font-family: 'Noto Sans JP', sans-serif;
+            flex: 1;
+            height: 36px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #333;
+            background-color: #e0e0e0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: background-color 0.1s;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        .qty-btn-small:active:not(:disabled) {
+            transform: scale(0.95);
+            background-color: #ccc;
+        }
+
+        .qty-btn-small:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* --- 券種選択 --- */
+        .bet-type-select {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #fff;
+            color: #333;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .bet-type-select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        /* --- 発券ボタン --- */
+        .issue-btn {
+            background: linear-gradient(135deg, #000000 75%, var(--primary-color) 25%);
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            padding: 0 20px;
+            height: 40px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: inset 0 0 0 2px var(--primary-color), 0 2px 4px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-family: 'Noto Sans JP', sans-serif;
+            white-space: nowrap;
+        }
+
+        .issue-btn:hover {
+            background-color: #1a1a1a;
+        }
+
+        .issue-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* --- 汎用トースト通知 --- */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30, 30, 30, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 1000;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-10px);
+        }
+
+        @media screen and (max-width: 480px) {
+            .toast {
+                width: 90%;
+                white-space: normal;
+                text-align: center;
+            }
+        }
+
+        /* =========================================
+           推しバ券テンプレート (画面外に隠す)
+        ========================================= */
+        #bakenContainer {
+            position: absolute;
+            top: -9999px;
+            left: 0;
+            z-index: -1000;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .baken-slip {
+            width: 760px;
+            height: 420px;
+            background: linear-gradient(to right, #e2efdf 0%, #e2efdf 28%, #ffffff 28%, #ffffff 100%);
+            padding: 25px 25px 20px 25px;
+            box-sizing: border-box;
+            color: #111;
+            display: grid;
+            grid-template-columns: 28% 1fr;
+            position: relative;
+            font-family: 'Noto Sans JP', sans-serif;
+            overflow: hidden;
+        }
+
+        /* 感圧式プリンタ風の縦長文字 */
+        .bk-tall {
+            display: inline-block;
+            transform: scaleY(1.15);
+            transform-origin: bottom left;
+        }
+
+        .bk-wide {
+            display: inline-block;
+            transform: scaleY(0.85);
+            transform-origin: bottom left;
+        }
+
+        /* 文字数が多い要素用 */
+        .bk-tall-narrow {
+            display: inline-block;
+            transform: scale(0.8, 1.15);
+            transform-origin: bottom left;
+            white-space: nowrap;
+        }
+
+        /* --- 左カラム (イベント情報・QR・発行日) --- */
+        .bk-left-col {
+            font-family: 'Noto Serif JP', serif;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding-right: 20px;
+            height: 100%;
+        }
+
+        .bk-date {
+            font-weight: normal;
+            font-size: 1.25rem;
+        }
+
+        .bk-venue-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+
+        .bk-venue-box {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: #111;
+            color: #e2efdf;
+            padding: 2px 10px;
+            border-radius: 2px;
+        }
+
+        .bk-day-box {
+            /* border: 2px solid #111;
+            padding: 0px 10px;
+            border-radius: 2px; */
+            padding-left: 6px;
+        }
+
+        .bk-event-title {
+            font-weight: 900;
+            font-size: 1.4rem;
+            line-height: 1.2;
+            word-break: keep-all;
+            margin-top: 5px;
+        }
+
+        /* QRコードのスタイル */
+        .bk-qr-box {
+            display: flex;
+            gap: 10px;
+            margin-top: 0px;
+        }
+
+        .bk-qr-box img {
+            width: 75px !important;
+            height: 75px !important;
+            flex-shrink: 0;
+            object-fit: contain;
+        }
+
+        /* 左カラム最下部のコンテナ */
+        .bk-left-bottom {
+            font-family: 'Noto Serif JP', serif;
+            font-weight: normal;
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .bk-ura-tokyo {
+            font-size: 1.3rem;
+        }
+
+        .bk-issue-date {
+            font-size: 1.1rem;
+        }
+
+
+        /* --- 右カラム (投票情報・合計金額) --- */
+        .bk-right-col {
+            display: flex;
+            flex-direction: row;
+            padding-left: 15px;
+        }
+
+        /* 券種 (単勝＋複勝) の縦長エリア */
+        .bk-bet-type-area {
+            flex: 0 0 16%;
+            display: flex;
+            align-items: flex-start;
+            margin-right: 20px;
+            margin-top: 40px;
+            margin-bottom: 5px;
+        }
+
+        /* 券種表示ボックス */
+        .bk-bet-type-box {
+            border: 2px solid #111;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 280px;
+            width: 80px;
+            box-sizing: border-box;
+            padding: 5px;
+        }
+
+        .bk-vert-text {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+        }
+
+        .bk-small-en {
+            font-size: 0.8rem;
+            font-weight: 900;
+            line-height: 1.1;
+            text-align: center;
+        }
+
+        .bk-plus {
+            font-size: 2.0rem;
+            font-weight: 900;
+            margin: 2px 0;
+        }
+
+        .bk-bet-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .bk-ganbare {
+            font-feature-settings: "palt";
+            text-align: center;
+            font-size: 3rem;
+            line-height: 1.25;
+            font-weight: 800;
+            letter-spacing: 20px;
+            margin-top: -13px;
+            margin-bottom: 15px;
+            padding-left: 20px;
+            border: 2px solid #111;
+            border-radius: 4px;
+            width: 100%;
+            padding: 8px 0;
+            box-sizing: border-box;
+        }
+
+        .bk-horse-info {
+            display: flex;
+            flex-direction: column;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+
+        .bk-cast-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .bk-horse-number {
+            border: 3px solid #111;
+            font-size: 2.5rem;
+            font-weight: 900;
+            padding: 2px 15px;
+            border-radius: 4px;
+            min-width: 44px;
+            text-align: center;
+        }
+
+        .bk-cast-name {
+            font-size: 3.2rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            line-height: 1;
+        }
+
+        .bk-uma-name {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 1.6rem;
+            font-weight: 900;
+            text-align: right;
+            margin-top: 8px;
+            margin-right: 0px;
+            letter-spacing: 2px;
+            color: #222;
+        }
+
+        .bk-amount-row {
+            font-family: 'Noto Serif JP', serif;
+            align-self: flex-end;
+            font-size: 1.6rem;
+            font-weight: normal;
+            margin-bottom: 5px;
+            margin-right: 0px;
+        }
+
+        .bk-stars {
+            font-family: 'Noto Sans JP', sans-serif;
+            letter-spacing: 2px;
+            margin: 0 5px;
+            font-size: 1.4rem;
+        }
+
+        .bk-val {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 2.4rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin: 0 5px;
+        }
+
+        /* 右カラム最下部 (合計金額) */
+        .bk-total-row {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 1.6rem;
+            font-weight: normal;
+            align-self: flex-end;
+            margin-right: 0px;
+            margin-bottom: 5px;
+            margin-top: auto;
+        }
+
+
+        /* --- モーダル・トースト（共通） --- */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30, 30, 30, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-10px);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 2000;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .modal-btn.cancel {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .modal-btn.twitter {
+            background: linear-gradient(135deg, #000000 75%, var(--primary-color) 25%);
+            box-shadow: inset 0 0 0 2px var(--primary-color), 0 2px 4px rgba(0, 0, 0, 0.15);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .loading {
+            color: #666;
+            text-align: center;
+            padding: 20px;
+            font-weight: bold;
+        }
+
+        /* --- カートエリア（上部固定表示） --- */
+        .cart-area {
+            position: sticky;
+            top: 10px;
+            z-index: 200;
+            background: #fff;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: flex-start;
+            min-height: 136px;
+            gap: 15px;
+        }
+
+        .cart-left {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .cart-right {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+            min-width: 145px;
+            /* 右カラムの幅を固定 */
+        }
+
+        .cart-header {
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .cart-status-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .cart-items {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .cart-item {
+            background: var(--bg-color);
+            border: 1px solid #ccc;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .cart-item-remove {
+            cursor: pointer;
+            color: #d32f2f;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        /* --- ウマ連・3連複に追加リンク --- */
+        .add-cart-link {
+            display: inline-block;
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: #666;
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: left;
+            width: 100%;
+        }
+
+        .add-cart-link:hover {
+            color: var(--primary-color);
+        }
+
+        /* 左カラム内の情報グループ化用 */
+        .card-info-top {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        /* --- 馬券レイアウト：複数人（ウマ連・3連複）表示用 --- */
+        .multi-names-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0px;
+            height: 100%;
+            width: 100%;
+            padding: 0;
+        }
+
+        .multi-name-block {
+            transform: scaleY(0.75);
+            transform-origin: center;
+            text-align: left;
+            line-height: 1;
+            width: 100%;
+        }
+
+        /* 馬番とキャスト名を横並びにするコンテナ */
+        .multi-cast-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* 複数人用の馬番デザイン */
+        .multi-horse-number {
+            border: 3px solid #111;
+            font-size: 2.2rem;
+            font-weight: 900;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-family: 'Noto Sans JP', sans-serif;
+            display: inline-block;
+            position: relative;
+            min-width: 44px;
+            text-align: center;
+        }
+
+        .multi-name-block:not(:last-child) .multi-horse-number::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            background-color: #111;
+            height: 72px;
+            z-index: -1;
+        }
+
+        .multi-cast-name {
+            font-size: 3.2rem;
+            font-weight: 900;
+        }
+
+        .multi-uma-name {
+            font-size: 1.8rem;
+            color: #222;
+            margin-top: 5px;
+            font-family: 'Noto Serif JP', serif;
+            text-align: right;
+            letter-spacing: 2px;
+            padding-right: 5px;
+        }
+
+        /* --- 履歴アイテムとカスタムチェックボックス --- */
+        .history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 12px 10px;
+            border-bottom: 1px dashed #ccc;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-info {
+            flex: 1;
+        }
+
+        .history-date {
+            font-size: 0.75rem;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .history-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #333;
+            line-height: 1.3;
+        }
+
+        .history-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .history-del-btn {
+            background-color: #000000;
+            color: #ffffff;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .history-reissue-btn {
+            background-color: #f1f8e9;
+            color: var(--primary-color);
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .history-reissue-btn:hover {
+            opacity: 0.8;
+        }
+
+        /* 押しやすい大きなチェックボックス */
+        .history-checkbox-wrapper {
+            position: relative;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .history-checkbox-wrapper input {
+            display: none;
+        }
+
+        .custom-checkbox {
+            width: 100%;
+            height: 100%;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            background: #fff;
+            box-sizing: border-box;
+            transition: all 0.1s;
+        }
+
+        .history-checkbox-wrapper input:checked+.custom-checkbox {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>');
+            background-size: 80%;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .history-checkbox-wrapper input:not(:checked)+.custom-checkbox {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23cccccc" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>');
+            background-size: 80%;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        @font-face {
+            font-family: 'UraLogoFont';
+            src: url('data:application/font-woff;charset=utf-8;base64,d09GRk9UVE8AAAeoAAoAAAAAB2AAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABDRkYyAAADcAAABBwAAAQcIGnpy09TLzIAAAFYAAAAYAAAAGAPEQzrY21hcAAAAvwAAABUAAAAVACXAJhnYXNwAAAHoAAAAAgAAAAIAAAAEGhlYWQAAAD0AAAANgAAADYvsh+haGhlYQAAASwAAAAkAAAAJAfCBCpobXR4AAAHjAAAABQAAAAUDgAAZG1heHAAAAFQAAAABgAAAAYABVAAbmFtZQAAAbgAAAFEAAABROguUPRwb3N0AAADUAAAACAAAAAgAAMAAAABAAAAAQAAw//ft18PPPUACwQAAAAAAOZJbZIAAAAA5kltkgBk/+IDnAOeAAAACAACAAAAAAAAAAEAAAPA/8AAAAQAAGQAZAOcAAEAAAAAAAAAAAAAAAAAAAAFAABQAAAFAAAAAwOAAZAABQAAApkCzAAAAI8CmQLMAAAB6wAzAQkAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAABAAAAAQQPA/8AAQAPAAEAAAAABAAAAAAAAAAAAAAAgAAAAAAAMAJYAAQAAAAAAAQAIACEAAQAAAAAAAgAHADkAAQAAAAAAAwAIAE4AAQAAAAAABAAQAH4AAQAAAAAABQALAAAAAQAAAAAABgAIAGYAAwABBAkAAQAQACkAAwABBAkAAgAOAEAAAwABBAkAAwAQAFYAAwABBAkABAAgAI4AAwABBAkABQAWAAsAAwABBAkABgAQAG5WZXJzaW9uIDEuMABWAGUAcgBzAGkAbwBuACAAMQAuADBVbnRpdGxlZABVAG4AdABpAHQAbABlAGRSZWd1bGFyAFIAZQBnAHUAbABhAHJVbnRpdGxlZABVAG4AdABpAHQAbABlAGRVbnRpdGxlZABVAG4AdABpAHQAbABlAGRVbnRpdGxlZCBSZWd1bGFyAFUAbgB0AGkAdABsAGUAZAAgAFIAZQBnAHUAbABhAHIAAAADAAAAAwAAABwAAQADAAAAHAADAAEAAAAcAAQAOAAAAAoACAACAAIAAAANACAAQf//AAAAAAANACAAQf//AAH/9f/j/8MAAQAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIABQAXHgoACXf/i4seCgAJd/+LiwwHqwwktREAAAAAAAAAAQEBBIu1EgAAAAUCAAEAAQABAAEAAQPi+I73BxWdLQWQc6Fxo4sI14oFmweKkneGe456j3+ZiJwIf8afjgWvkp2dka+OnYWhfZd/mH2Ueo8I+1QGjHcFlYyUho6BCI37UAWLhYOHh4kIf4UFevaYB4uUf4mGkYiOh5GLkAj3W8EHoYuggZR1knuIeX5/gYF/hX2LCPuh9wQVjHibhwWSiZKJj4QIijIFWwdnB4uDhIWFhnh8c4h0j3+NgI6AkYSQgJKLlQj3QgeOj46Nj4wIpJIFnvsBeweLh5qJi4QI+ysHi3mVe5mAm32eg5+HtYG3jbGfl5GWkpSVkZKTlIuVCIz3NwWNkZONkI2NkYuRiZAI+FJvFZhnlWiXZgigRgWQfY95f4sIb4oFiIuJiYuHCH7WBzn3lQU0Bl/7XQWJgoiEhoN+eXiai3wIfeUHm9AFlLGSsZKyjpuNnJGbjZCRjI+LkIqMh42GCPy57BVWtn2XBYiNh4+LkIqTkZKRkJKPkpKIjwh6qQV+on+hg6OGnYicjJ0IjJYFjamVqJuljI2Ni4yLjIuNiYyKCJBoBZBwmXScdgiUgwWRhZGFk4WGioWKhoxqmXizga2Lj4qNiIyJi4eLiogIhXAFiX+KgI2Ajm6og6aHgIKFfYx8jYuPi4yKj32WaJWOk42Qk4yTjp+BnpCcjZGSkZKJk4iTbY5+jIiNio2LjYuNjIuOCJWuBZOIk4uTipSKlIyViwiVjQWajZmOmJMIk5AFjY2LjYqNi46Ji4iLXo5hoHCufpyCnYeghK6QsJysm6mnnqWejY2NjYmOioyGi4mKCFF6BYqLio+MjAiVsY6fBcsHi4+GjYiMh4uHiomICD4qjEMFi4iIiYmLioqIjIqNebJwrW+rh5CHjYaJhYqJh4qFCIdEBYp5j3qWfQioZgWOiYmIiYl3c3lxf259aodsl2iXZ6hntIePhY+EioOKg3uLiIKJhoyGjoaUfZeAln+RhJKEkoUIwFoFlYKTh5eUmZSXlpaYCKmrBZWVmJSVg5t8g3KTfo+FnJmUk5+enp6eoJqcmJ2Wn5iikqSNppDEictvvHqneKJyoHOfcZxslICPgIx/iHiAWWiXeo2Jj4iPiwinBqSLo4ijhLGArnWlbaJwlmiIZ4Zad1xnaX19fIF5g3KAcpN4nAhycAV3dHd2dXeGhoaHhIgI+GT0FXyagZ6IoIeiiqGLowiMs4yZBZ0HjKqLqomriauEs3ajgJh8lHyTTqY6gUt7iIqJioqIi4iNiY2KCJuGBZOIkoiSiM5tuk+ZRAiWQwWSX5JdoWWdbLBvq3uyd7aCt4yOi42MjI+MjYqOiIxhl12cbasIAAAAAAQAAAAEAAAAAgAAAAQAAGQAAQAB//8ADw==') format('woff');
+        }
+
+        .bk-right-col {
+            position: relative;
+            z-index: 1;
+            --wm-size: 130px;
+            /* ロゴ自体の大きさ */
+            --wm-gap: 140px;
+            /* ロゴ同士の隙間（横・縦共通） */
+            --wm-start-y: -84px;
+            /* 全体の基準位置（上下） */
+            --wm-start-x: 0px;
+            /* 全体の基準位置（左右） */
+            --wm-step: calc(var(--wm-size) + var(--wm-gap));
+            /* 1マス分の全体サイズ */
+            --wm-offset: calc(var(--wm-step) / 2);
+            /* レンガ積みのズレ幅 */
+        }
+
+        .watermark-text {
+            position: absolute;
+            z-index: -1;
+            font-family: 'UraLogoFont', sans-serif;
+            color: #e2efdf;
+            font-size: var(--wm-size);
+            letter-spacing: var(--wm-gap);
+            line-height: var(--wm-step);
+            white-space: nowrap;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        .watermark-layer1 {
+            top: var(--wm-start-y);
+            left: var(--wm-start-x);
+        }
+
+        .watermark-layer2 {
+            top: calc(var(--wm-start-y) + var(--wm-offset));
+            left: calc(var(--wm-start-x) + var(--wm-offset));
+        }
+
+        @media screen and (max-width: 768px) {
+            .item-card {
+                padding: 12px;
+                gap: 8px;
+                align-items: center;
+            }
+
+            .card-right {
+                flex-direction: column;
+                align-items: stretch;
+                flex: 0 0 145px;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header-meta">
+            <span class="version-text">v<span id="version">1.04a</span></span>
+            <a href="https://nyaftama.github.io/" target="_blank" rel="noopener noreferrer" class="credit-link">作った人:
+                <strong>@nyaftama</strong>
+            </a>
+        </div>
+
+        <h1 class="main-title">
+            ウマ娘 推しバ券メーカー <br>
+            <span class="sub-title">7th in TOKYO edition</span>
+        </h1>
+        <div class="eng-title">UMAMUSUME OSHI-BAKEN MAKER: 7th in tokyo Edition</div>
+        <div
+            style="padding: 0 10px; margin-bottom: 10px; display: flex; flex-wrap: wrap; row-gap: 5px; column-gap: 15px; align-items: center;">
+            <a href="#" id="historyBtn" class="credit-link"
+                style="font-size: 0.85rem; color: var(--primary-color); font-weight: bold; text-decoration: underline;">
+                発券履歴・印刷用PDF
+            </a>
+            <a href="https://nyaftama.github.io/uma-ouen-baken/" class="credit-link"
+                style="font-size: 0.85rem; color: var(--primary-color); font-weight: bold; text-decoration: underline;">
+                ALLSTAR edition (全キャラ)
+            </a>
+        </div>
+
+        <div class="day-toggle">
+            <label class="day-label">
+                <input type="radio" name="daySelect" value="1" checked> DAY 1 (6/20)
+            </label>
+            <label class="day-label">
+                <input type="radio" name="daySelect" value="2"> DAY 2 (6/21)
+            </label>
+        </div>
+
+        <div id="cartArea" class="cart-area">
+            <div class="cart-left">
+                <div class="cart-header">
+                    ウマ連・3連複 候補リスト
+                    <div class="cart-status-row">
+                        <span id="cartCount">0/3</span>
+                        <span id="cartBetType"></span>
+                    </div>
+                </div>
+                <div id="cartItems" class="cart-items"></div>
+            </div>
+
+            <div id="cartRight" class="cart-right" style="display: none;">
+                <div class="amount-control-wrapper">
+                    <div class="qty-main-row" style="justify-content: center;">
+                        <button id="cartMinusBtn" class="qty-btn">-</button>
+                        <span id="cartQtySpan" class="qty-display">100</span>
+                        <button id="cartPlusBtn" class="qty-btn">+</button>
+                    </div>
+                    <div class="qty-sub-row" style="justify-content: center;">
+                        <button id="cartMinus1000Btn" class="qty-btn-small">-1000</button>
+                        <button id="cartPlus1000Btn" class="qty-btn-small">+1000</button>
+                    </div>
+                </div>
+                <button id="cartIssueBtn" class="issue-btn" style="margin: 0; width: 100%;">発券</button>
+            </div>
+        </div>
+
+        <div class="search-box">
+            <div class="search-input-wrapper">
+                <input type="text" id="searchInput" placeholder="キャスト名やキャラ名で検索..." autocomplete="off">
+                <button id="clearInputBtn" class="clear-input-btn" aria-label="クリア">✕</button>
+            </div>
+            <div id="suggestionsBox" class="suggestions-box"></div>
+        </div>
+
+        <div id="loading" class="loading">キャストデータを読み込んでいます...</div>
+        <div id="itemList" class="item-list" style="display: none;"></div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <div id="shareModal" class="modal-overlay">
+        <div class="modal-content">
+            <p style="font-size: 0.95rem; font-weight: bold; color: #333; margin-bottom: 5px;">推しバ券が発券されました！</p>
+            <p style="font-size: 0.8rem; color: #666; margin-bottom: 15px;">
+                画像を長押し（または右クリック）で保存できます。<br>
+                画像のテキスト認識が可能な端末（iPhoneやPixelなど）では、文字以外の部分を長押ししてください。<br>
+                <span style="color: var(--primary-color); font-weight: bold;">Xでシェアする際には、保存した画像を手動で添付してください。</span>
+            </p>
+
+            <div id="shareImageLoading" style="padding: 20px; color: #666;">推しバ券を印刷中...</div>
+            <img id="shareImagePreview" src="" alt="推しバ券"
+                style="width: 100%; border-radius: 4px; display: none; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+
+            <div class="modal-actions">
+                <button id="shareCloseBtn" class="modal-btn cancel">閉じる</button>
+                <a id="shareTwitterBtn" class="modal-btn twitter" href="#" target="_blank" rel="noopener noreferrer">
+                    Xでシェア
+                </a>
+            </div>
+            <div style="margin-top: 15px; text-align: center;">
+                <a href="#" id="openHistoryFromShare"
+                    style="font-size: 0.9rem; color: var(--primary-color); text-decoration: underline; font-weight: bold;">▶
+                    発券履歴・印刷用PDF画面を開く</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="bakenContainer">
+        <div id="bakenSlip" class="baken-slip">
+
+            <div class="bk-left-col">
+                <div id="bkDate" class="bk-date bk-tall">2026年6月20日</div>
+                <div class="bk-venue-row bk-tall">
+                    <span class="bk-venue-box">東京</span>
+                    <span id="bkDay" class="bk-day-box">1</span>
+                    <span>日目</span>
+                </div>
+                <div class="bk-event-title bk-tall">ウマ娘<br>7th EVENT<br>WORLD TOUR<br>｢THE STAGE｣</div>
+
+                <div class="bk-qr-box">
+                    <img src="qr_7th_tokyo.svg" alt="QR">
+                    <img src="qr_baken_maker.svg" alt="QR">
+                </div>
+
+                <div class="bk-left-bottom">
+                    <div class="bk-ura-tokyo">推しバ券メーカー</div>
+                    <div id="bkIssueDate" class="bk-issue-date"></div>
+                </div>
+            </div>
+
+            <div class="bk-right-col">
+                <div class="bk-bet-type-area">
+                    <div id="bkBetTypeBox" class="bk-bet-type-box bk-tall">
+                        <div class="bk-small-en">WIN</div>
+                        <div class="bk-vert-text">単<br>勝</div>
+                    </div>
+                </div>
+
+                <div class="bk-bet-details">
+                    <div id="bkMessage" class="bk-ganbare bk-wide">がんばれ！</div>
+
+                    <div id="bkNameArea" class="bk-horse-info">
+                        <div class="bk-cast-row">
+                            <div id="bkNumber" class="bk-horse-number bk-tall">1</div>
+                            <div id="bkCast" class="bk-cast-name bk-tall">Machico</div>
+                        </div>
+                        <div id="bkName" class="bk-uma-name bk-tall">トウカイテイオー</div>
+                    </div>
+
+                    <div class="bk-amount-row bk-tall">
+                        各<span class="bk-stars" id="bkStarsSub">☆☆☆</span><span id="bkVal" class="bk-val">100</span>
+                        ジュエル
+                    </div>
+
+                    <div class="bk-total-row bk-tall">
+                        合計<span class="bk-stars" id="bkStarsTotal">★★★</span><span id="bkTotalVal"
+                            class="bk-val">200</span> ジュエル
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 履歴・印刷用モーダル -->
+    <div id="historyModal" class="modal-overlay">
+        <div class="modal-content"
+            style="max-width: 600px; width: 90%; height: 80vh; display: flex; flex-direction: column;">
+            <h3 style="margin-top: 0;">発券履歴・印刷用PDF</h3>
+            <p style="font-size: 0.8rem; color: #666; text-align: left;">
+                最近発券したバ券（最大8枚）が保存されています。チェックを入れてPDF保存ボタンを押すと、A4サイズの印刷用PDFをダウンロードできます。</p>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <a href="#" id="deleteAllHistoryBtn"
+                    style="color: #000000; font-weight: bold; text-decoration: underline; font-size: 0.9rem;">すべて削除...</a>
+                <a href="#" id="selectAllHistoryBtn"
+                    style="color: var(--primary-color); text-decoration: underline; font-size: 0.9rem; font-weight: bold;">すべて選択
+                    / 解除</a>
+            </div>
+
+            <div id="historyList"
+                style="flex: 1; overflow-y: auto; text-align: left; margin: 5px 0 15px 0; border: 1px solid #eee; padding: 10px; border-radius: 8px;">
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
+                <button id="closeHistoryBtn" class="modal-btn cancel" style="padding: 10px 15px;">閉じる</button>
+                <button id="printSelectedBtn" class="modal-btn"
+                    style="background: linear-gradient(135deg, #000000 75%, var(--primary-color) 25%); color: #ffffff; box-shadow: inset 0 0 0 2px var(--primary-color); padding: 10px 15px;">PDF保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const version = document.getElementById('version');
+        const castCsvPath = './cast_list.csv?v=' + version;
+        const colorCsvPath = './uma_list.csv?v=' + version;
+
+        let allCastData = [];
+        let colorMap = {};
+        let searchKeywordsArray = [];
+
+        // 各キャラクターごとの入力金額を保持するオブジェクト（デフォルト100）
+        let ticketAmounts = {};
+        // 各キャラクターごとの選択券種を保持するオブジェクト
+        let ticketTypes = {};
+
+        // 組み合わせ（カート）用状態管理
+        let cartItems = [];
+        let cartAmount = 100;
+
+        function updateCartUI() {
+            const cartArea = document.getElementById('cartArea');
+            const itemsDiv = document.getElementById('cartItems');
+            const cartRight = document.getElementById('cartRight');
+            const countSpan = document.getElementById('cartCount');
+            const betTypeSpan = document.getElementById('cartBetType');
+
+            // ボタン要素の取得
+            const cartMinusBtn = document.getElementById('cartMinusBtn');
+            const cartPlusBtn = document.getElementById('cartPlusBtn');
+            const cartMinus1000Btn = document.getElementById('cartMinus1000Btn');
+            const cartPlus1000Btn = document.getElementById('cartPlus1000Btn');
+            const cartIssueBtn = document.getElementById('cartIssueBtn');
+
+            if (cartItems.length > 0) {
+                cartArea.style.display = 'flex';
+                cartRight.style.display = 'flex';
+            } else {
+                cartArea.style.display = 'none';
+            }
+
+            itemsDiv.innerHTML = '';
+            countSpan.textContent = `${cartItems.length}/3`;
+
+            cartItems.forEach((item, index) => {
+                const el = document.createElement('div');
+                el.className = 'cart-item';
+                el.innerHTML = `<span>${item.cast_name}</span> <span class="cart-item-remove" data-index="${index}">×</span>`;
+                itemsDiv.appendChild(el);
+            });
+
+            // 削除イベント
+            document.querySelectorAll('.cart-item-remove').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const idx = e.target.getAttribute('data-index');
+                    cartItems.splice(idx, 1);
+                    updateCartUI();
+                });
+            });
+
+            // 券種の判定とボタンの有効/無効の切り替え
+            const isReady = cartItems.length >= 2; // 2人以上で発券可能
+
+            if (cartItems.length === 2) {
+                betTypeSpan.textContent = 'ウマ連';
+            } else if (cartItems.length === 3) {
+                betTypeSpan.textContent = '3連複';
+            } else {
+                betTypeSpan.textContent = ''; // 1人の時は券種名を空にしておく
+            }
+
+            cartPlusBtn.disabled = !isReady;
+            cartPlus1000Btn.disabled = !isReady;
+            cartIssueBtn.disabled = !isReady;
+
+            cartMinusBtn.disabled = !isReady || cartAmount <= 100;
+            cartMinus1000Btn.disabled = !isReady || cartAmount <= 100;
+
+            document.querySelectorAll('.item-card').forEach(card => {
+                const castName = card.dataset.castName;
+                if (cartItems.some(item => item.cast_name === castName)) {
+                    card.classList.add('checked-row');
+                } else {
+                    card.classList.remove('checked-row');
+                }
+            });
+        }
+
+        function addToCart(rowData) {
+            if (cartItems.length >= 3) {
+                showToast('追加できるのは3人までです');
+                return;
+            }
+
+            if (cartItems.some(item => item.cast_name === rowData.cast_name)) {
+                showToast('既に追加されています');
+                return;
+            }
+
+            if (cartItems.length === 0) {
+                const key = `${rowData.day}_${rowData.uma_number}`;
+                if (ticketAmounts[key]) {
+                    cartAmount = ticketAmounts[key];
+                }
+            }
+
+            cartItems.push(rowData);
+            updateCartUI();
+
+            document.getElementById('cartQtySpan').textContent = cartAmount;
+
+            showToast(`${rowData.cast_name} を追加しました`);
+        }
+
+        // 汎用トースト通知関数
+        let toastTimeout;
+        function showToast(msg, duration = 2500) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => toast.classList.remove('show'), duration);
+        }
+
+        // 連打判定用の変数
+        let rapidClickCount = 0;
+        let lastClickTime = 0;
+        let hasShownLongPressHint = false;
+
+        function checkRapidClick() {
+            if (hasShownLongPressHint) return;
+
+            const now = Date.now();
+            // 前回から500ミリ秒以内の連続タップならカウントアップ
+            if (now - lastClickTime < 500) {
+                rapidClickCount++;
+                if (rapidClickCount >= 10) {
+                    showToast('ボタンを長押しすると素早く増減できます', 4000);
+                    hasShownLongPressHint = true;
+                }
+            } else {
+                rapidClickCount = 1;
+            }
+            lastClickTime = now;
+        }
+
+        function setupLongPress(btn, action) {
+            let timer;
+            let currentDelay;
+            let isPressing = false;
+
+            const startPress = (e) => {
+                if (e.type === 'touchstart') e.preventDefault();
+                if (btn.disabled || isPressing) return;
+
+                isPressing = true;
+                checkRapidClick();
+                action();
+
+                currentDelay = 250;
+                timer = setTimeout(repeat, 500);
+            };
+
+            const repeat = () => {
+                action();
+                // 徐々に間隔を短くして加速させる (最低20msまで)
+                currentDelay = Math.max(20, currentDelay * 0.85);
+                timer = setTimeout(repeat, currentDelay);
+            };
+
+            const stopPress = () => {
+                isPressing = false;
+                clearTimeout(timer);
+            };
+
+            // パソコン用イベント
+            btn.addEventListener('mousedown', startPress);
+            btn.addEventListener('mouseup', stopPress);
+            btn.addEventListener('mouseleave', stopPress);
+
+            // スマホ用イベント
+            btn.addEventListener('touchstart', startPress, { passive: false });
+            btn.addEventListener('touchend', stopPress);
+            btn.addEventListener('touchcancel', stopPress);
+
+            // 念のため右クリックメニューも防止
+            btn.addEventListener('contextmenu', (e) => e.preventDefault());
+        }
+
+        const searchInput = document.getElementById('searchInput');
+        const clearInputBtn = document.getElementById('clearInputBtn');
+        const suggestionsBox = document.getElementById('suggestionsBox');
+        const dayRadios = document.querySelectorAll('input[name="daySelect"]');
+
+        // color.csv の読み込み
+        Papa.parse(colorCsvPath, {
+            download: true, header: true, skipEmptyLines: true,
+            complete: function (results) {
+                results.data.forEach(row => {
+                    if (row.uma_name && row.main_color) {
+                        colorMap[row.uma_name] = { main: row.main_color, sub: row.sub_color || '#cccccc' };
+                    }
+                });
+                loadCastData(); // カラー情報を保持してからキャストデータを読み込む
+            },
+            error: function (err) {
+                console.warn('color.csvの読み込みに失敗しました。', err);
+                loadCastData();
+            }
+        });
+
+        // キャストデータ読み込み
+        function loadCastData() {
+            Papa.parse(castCsvPath, {
+                download: true, header: true, skipEmptyLines: true,
+                complete: function (results) {
+                    allCastData = results.data;
+
+                    const keywordsSet = new Set();
+                    allCastData.forEach(row => {
+                        if (row.cast_name) keywordsSet.add(row.cast_name.trim());
+                        if (row.uma_name) {
+                            keywordsSet.add(row.uma_name.replace('役', '').trim());
+                        }
+                    });
+                    searchKeywordsArray = Array.from(keywordsSet).filter(k => k);
+
+                    applyFilters();
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('itemList').style.display = 'flex';
+                },
+                error: function (err) {
+                    document.getElementById('loading').innerText = 'キャストデータの読み込みに失敗しました。';
+                }
+            });
+        }
+
+        // 検索・絞り込み処理
+        function applyFilters() {
+            const keyword = searchInput.value.toLowerCase().trim();
+            const selectedDay = document.querySelector('input[name="daySelect"]:checked').value;
+
+            const filteredData = allCastData.filter(row => {
+                if (row.day !== selectedDay) return false;
+
+                if (keyword) {
+                    const cast = (row.cast_name || '').toLowerCase();
+                    const uma = (row.uma_name || '').toLowerCase();
+                    return cast.includes(keyword) || uma.includes(keyword);
+                }
+                return true;
+            });
+            renderList(filteredData);
+        }
+
+        // イベントリスナー
+        dayRadios.forEach(radio => radio.addEventListener('change', applyFilters));
+
+        searchInput.addEventListener('input', function (e) {
+            const keyword = e.target.value.toLowerCase().trim();
+            clearInputBtn.style.display = keyword ? 'block' : 'none';
+            applyFilters();
+            showSuggestions(keyword);
+        });
+
+        clearInputBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            clearInputBtn.style.display = 'none';
+            suggestionsBox.innerHTML = '';
+            applyFilters();
+            searchInput.focus();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-box')) suggestionsBox.innerHTML = '';
+        });
+
+        // 文字列から色を生成する関数（バッジ用）
+        function getBadgeColor(name) {
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) { hash = name.charCodeAt(i) + ((hash << 5) - hash); }
+            return `hsl(${Math.abs(hash) % 360}, 70%, 40%)`;
+        }
+
+        // サジェスト表示
+        function showSuggestions(keyword) {
+            suggestionsBox.innerHTML = '';
+            if (!keyword) return;
+
+            const matches = searchKeywordsArray.filter(k => k.toLowerCase().includes(keyword)).slice(0, 3);
+            if (matches.length === 0) return;
+
+            matches.forEach(match => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+
+                // 出演DAYの判定 ---
+                const appearances = allCastData.filter(row =>
+                    (row.cast_name && row.cast_name.trim() === match) ||
+                    (row.uma_name && row.uma_name.replace('役', '').trim() === match)
+                );
+
+                // 出演しているDAYの数字（1, 2など）を重複なく抽出して昇順に並べる
+                const days = [...new Set(appearances.map(row => row.day))].sort();
+
+                // 「DAY 1」や「DAY 1 + DAY 2」という文字列を作る
+                let dayText = '';
+                if (days.length > 0) {
+                    dayText = days.map(d => `DAY ${d}`).join(' + ');
+                }
+
+                div.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        <span class="suggestion-icon-svg"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/></svg></span>
+                        ${match}
+                    </div>
+                    <div class="suggestion-day-label">${dayText}</div>
+                `;
+                div.addEventListener('click', () => {
+                    searchInput.value = match;
+                    clearInputBtn.style.display = 'block';
+                    suggestionsBox.innerHTML = '';
+
+                    const currentDay = document.querySelector('input[name="daySelect"]:checked').value;
+                    const appearances = allCastData.filter(row =>
+                        (row.cast_name && row.cast_name.trim() === match) ||
+                        (row.uma_name && row.uma_name.replace('役', '').trim() === match)
+                    );
+
+                    const appearsOnCurrentDay = appearances.some(row => row.day === currentDay);
+
+                    if (!appearsOnCurrentDay && appearances.length > 0) {
+                        const targetDay = appearances[0].day;
+                        const targetRadio = document.querySelector(`input[name="daySelect"][value="${targetDay}"]`);
+
+                        if (targetRadio) {
+                            targetRadio.checked = true;
+                            showToast(`タブをDAY ${targetDay} に切り替えました`);
+                        }
+                    }
+                    applyFilters();
+                });
+                suggestionsBox.appendChild(div);
+            });
+        }
+
+        // リスト描画
+        function renderList(data) {
+            const listContainer = document.getElementById('itemList');
+            listContainer.innerHTML = '';
+            if (data.length === 0) {
+                listContainer.innerHTML = `<div style="text-align:center; padding:20px; color:#666;">該当するキャストがいません</div>`;
+                return;
+            }
+
+            data.forEach((row, index) => {
+                const key = `${row.day}_${row.uma_number}`;
+                if (!ticketAmounts[key]) ticketAmounts[key] = 100;
+
+                const cleanUmaName = (row.uma_name || '').replace('役', '').trim();
+                const isGuest = String(row.is_guest).toUpperCase() === 'TRUE';
+
+                let badgeStyle = '';
+                if (colorMap[cleanUmaName]) {
+                    const c = colorMap[cleanUmaName];
+                    badgeStyle = `background: linear-gradient(135deg, ${c.main} 75%, ${c.sub} 25%);`;
+                } else {
+                    badgeStyle = `background-color: ${getBadgeColor(cleanUmaName)};`;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.dataset.castName = row.cast_name;
+                if (cartItems.some(item => item.cast_name === row.cast_name)) {
+                    card.classList.add('checked-row');
+                }
+
+                const leftDiv = document.createElement('div');
+                leftDiv.className = 'card-left';
+
+                const infoTopDiv = document.createElement('div');
+                infoTopDiv.className = 'card-info-top';
+
+                const badgesWrapper = document.createElement('div');
+                badgesWrapper.className = 'badges-wrapper';
+                badgesWrapper.innerHTML = `<span class="uma-badge" style="${badgeStyle}">${cleanUmaName}</span>`;
+                if (isGuest) badgesWrapper.innerHTML += `<span class="guest-badge">GUEST</span>`;
+                infoTopDiv.appendChild(badgesWrapper);
+
+                const castDiv = document.createElement('div');
+                castDiv.className = 'cast-name';
+                castDiv.innerHTML = `<span class="uma-number-box">${row.uma_number}</span>${row.cast_name}`;
+                infoTopDiv.appendChild(castDiv);
+
+                // 別日リンク
+                const otherAppearances = allCastData.filter(item =>
+                    item.cast_name === row.cast_name && item.day !== row.day
+                );
+
+                if (otherAppearances.length > 0) {
+                    otherAppearances.forEach(otherRow => {
+                        const jumpLink = document.createElement('div');
+                        jumpLink.className = 'other-day-link';
+                        jumpLink.textContent = `▶ DAY ${otherRow.day} へ`;
+
+                        jumpLink.addEventListener('click', () => {
+                            const targetRadio = document.querySelector(`input[name="daySelect"][value="${otherRow.day}"]`);
+                            if (targetRadio) {
+                                targetRadio.checked = true;
+                            }
+
+                            const searchInput = document.getElementById('searchInput');
+                            const clearInputBtn = document.getElementById('clearInputBtn');
+                            if (searchInput && clearInputBtn) {
+                                searchInput.value = row.cast_name;
+                                clearInputBtn.style.display = 'block';
+                            }
+
+                            applyFilters();
+                            showToast(`タブをDAY ${otherRow.day} に切り替えました`);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        });
+
+                        infoTopDiv.appendChild(jumpLink);
+                    });
+                }
+
+                // カート追加リンク
+                const addCartLink = document.createElement('div');
+                addCartLink.className = 'add-cart-link';
+                addCartLink.innerHTML = `＋ ウマ連・3連複に追加`;
+                addCartLink.style.alignSelf = 'flex-start';
+                addCartLink.style.width = 'fit-content';
+                addCartLink.style.display = 'inline-block';
+                addCartLink.addEventListener('click', () => addToCart(row));
+
+                leftDiv.style.display = 'flex';
+                leftDiv.style.flexDirection = 'column';
+                leftDiv.style.justifyContent = 'space-between';
+                leftDiv.style.height = '100%';
+                leftDiv.style.alignItems = 'flex-start';
+                infoTopDiv.style.width = '100%';
+
+                leftDiv.appendChild(infoTopDiv);
+                leftDiv.appendChild(addCartLink);
+
+                card.appendChild(leftDiv);
+
+                const rightDiv = document.createElement('div');
+                rightDiv.className = 'card-right';
+
+                const amountControl = document.createElement('div');
+                amountControl.className = 'amount-control-wrapper';
+
+                const qtyMainRow = document.createElement('div');
+                qtyMainRow.className = 'qty-main-row';
+
+                const minusBtn = document.createElement('button');
+                minusBtn.className = 'qty-btn'; minusBtn.textContent = '−';
+                const qtySpan = document.createElement('span');
+                qtySpan.className = 'qty-display'; qtySpan.textContent = ticketAmounts[key];
+                const plusBtn = document.createElement('button');
+                plusBtn.className = 'qty-btn'; plusBtn.textContent = '＋';
+
+                const qtySubRow = document.createElement('div');
+                qtySubRow.className = 'qty-sub-row';
+
+                const minus1000Btn = document.createElement('button');
+                minus1000Btn.className = 'qty-btn-small';
+                minus1000Btn.textContent = '-1000';
+
+                const plus1000Btn = document.createElement('button');
+                plus1000Btn.className = 'qty-btn-small';
+                plus1000Btn.textContent = '+1000';
+
+                qtySubRow.appendChild(minus1000Btn);
+                qtySubRow.appendChild(plus1000Btn);
+
+                const updateQty = (newAmount) => {
+                    if (newAmount < 100) newAmount = 100;
+                    ticketAmounts[key] = newAmount;
+                    qtySpan.textContent = newAmount;
+                    minusBtn.disabled = newAmount <= 100;
+                    minus1000Btn.disabled = newAmount <= 100;
+                };
+                minusBtn.disabled = ticketAmounts[key] <= 100;
+                minus1000Btn.disabled = ticketAmounts[key] <= 100;
+
+                setupLongPress(minusBtn, () => updateQty(ticketAmounts[key] - 100));
+                setupLongPress(plusBtn, () => updateQty(ticketAmounts[key] + 100));
+                setupLongPress(minus1000Btn, () => updateQty(ticketAmounts[key] - 1000));
+                setupLongPress(plus1000Btn, () => updateQty(ticketAmounts[key] + 1000));
+
+                qtyMainRow.appendChild(minusBtn);
+                qtyMainRow.appendChild(qtySpan);
+                qtyMainRow.appendChild(plusBtn);
+
+                // 券種選択セレクトボックスの生成
+                if (!ticketTypes[key]) ticketTypes[key] = 'ouen'; // デフォルトは応援バ券
+
+                const betTypeSelect = document.createElement('select');
+                betTypeSelect.className = 'bet-type-select';
+                betTypeSelect.innerHTML = `
+                    <option value="ouen">応援バ券 (単＋複)</option>
+                    <option value="tansho">単勝</option>
+                `;
+                betTypeSelect.value = ticketTypes[key];
+                betTypeSelect.addEventListener('change', (e) => {
+                    ticketTypes[key] = e.target.value;
+                });
+
+                amountControl.appendChild(betTypeSelect);
+                amountControl.appendChild(qtyMainRow);
+                amountControl.appendChild(qtySubRow);
+
+                const issueBtn = document.createElement('button');
+                issueBtn.className = 'issue-btn';
+                issueBtn.innerHTML = `発券`;
+                issueBtn.addEventListener('click', () => generateTicket(row, ticketAmounts[key], ticketTypes[key]));
+
+                rightDiv.appendChild(amountControl);
+                rightDiv.appendChild(issueBtn);
+                card.appendChild(rightDiv);
+
+                listContainer.appendChild(card);
+            });
+        }
+
+        // 画像生成処理
+        const shareModal = document.getElementById('shareModal');
+        const shareImagePreview = document.getElementById('shareImagePreview');
+        const shareImageLoading = document.getElementById('shareImageLoading');
+
+        async function generateTicket(data, amount, betType, isReissue = false) {
+            shareModal.classList.add('show');
+            shareImageLoading.style.display = 'block';
+            shareImagePreview.style.display = 'none';
+
+            // 配列かどうかで単一馬券か組み合わせ馬券かを判定
+            const isMulti = Array.isArray(data);
+            const firstData = isMulti ? data[0] : data;
+
+            const cleanUmaName = (firstData.uma_name || '').replace('役', '').trim();
+
+            const dateParts = firstData.event_date.split('/');
+            const year = dateParts[0];
+            const month = parseInt(dateParts[1], 10);
+            const day = parseInt(dateParts[2], 10);
+
+            document.getElementById('bkDate').textContent = `${year}年${month}月${day}日`;
+            document.getElementById('bkDay').textContent = firstData.day;
+
+            // 発券日
+            const now = new Date();
+            const issueMonth = now.getMonth() + 1;
+            const issueDate = now.getDate();
+            document.getElementById('bkIssueDate').textContent = `${issueMonth}月${issueDate}日`;
+
+            const bkBetTypeBox = document.getElementById('bkBetTypeBox');
+            const bkMessage = document.getElementById('bkMessage');
+            const bkNameArea = document.getElementById('bkNameArea');
+
+            let totalAmount = amount;
+
+            // 券種表示とメッセージの分岐
+            if (betType === 'umaren') {
+                bkBetTypeBox.innerHTML = `<div class="bk-small-en">QUINELLA</div><div class="bk-vert-text" style="margin: 15px 0;">ウマ連</div>`;
+                bkMessage.style.display = 'none';
+            } else if (betType === 'sanrenpuku') {
+                bkBetTypeBox.innerHTML = `<div class="bk-small-en">TRIO</div><div class="bk-vert-text" style="margin: 15px 0;">３連複</div>`;
+                bkMessage.style.display = 'none';
+            } else if (betType === 'tansho') {
+                bkBetTypeBox.innerHTML = `<div class="bk-small-en">WIN</div><div class="bk-vert-text" style="margin: 15px 0;">単<br>勝</div>`;
+                bkMessage.style.display = 'block';
+                bkMessage.textContent = '激推し';
+                totalAmount = amount;
+            } else {
+                // 応援馬券（単＋複）の分岐
+                bkBetTypeBox.innerHTML = `<div class="bk-small-en">WIN</div><div class="bk-vert-text">単<br>勝</div><div class="bk-plus">＋</div><div class="bk-vert-text">複<br>勝</div><div class="bk-small-en">PLACE<br>SHOW</div>`;
+                bkMessage.style.display = 'block';
+                bkMessage.textContent = 'がんばれ！';
+                totalAmount = amount * 2;
+            }
+
+            // 金額と星の反映
+            const getStars = (val, isTotal) => {
+                const char = isTotal ? '★' : '☆';
+                const targetLength = isTotal ? 7 : 6;
+                const starCount = Math.max(0, targetLength - val.toString().length);
+                return char.repeat(starCount);
+            };
+
+            document.getElementById('bkVal').textContent = amount;
+
+            // 金額エリアの縮小処理
+            const amountRow = document.querySelector('.bk-amount-row');
+            const totalRow = document.querySelector('.bk-total-row');
+
+            if (isMulti) {
+                // ウマ連・3連複の場合は右下を基準に85%に縮小
+                if (amountRow) {
+                    amountRow.style.transform = 'scale(0.85)';
+                    amountRow.style.transformOrigin = 'right bottom';
+                    amountRow.style.marginBottom = '-10px';
+                }
+                if (totalRow) {
+                    totalRow.style.transform = 'scale(0.85)';
+                    totalRow.style.transformOrigin = 'right bottom';
+                }
+            } else {
+                // 単一馬券の場合は元のサイズに戻す
+                if (amountRow) {
+                    amountRow.style.transform = 'none';
+                    amountRow.style.marginBottom = '5px';
+                }
+                if (totalRow) totalRow.style.transform = 'none';
+            }
+
+            document.getElementById('bkStarsSub').textContent = getStars(amount, false);
+            document.getElementById('bkTotalVal').textContent = totalAmount;
+            document.getElementById('bkStarsTotal').textContent = getStars(totalAmount, true);
+
+            // 名前エリアのレンダリング分岐
+            if (isMulti) {
+                // 複数人（ウマ連・3連複）の場合
+                let multiHtml = `<div class="multi-names-container">`;
+                data.forEach(row => {
+                    const cleanName = (row.uma_name || '').replace('役', '').trim();
+                    multiHtml += `
+                        <div class="multi-name-block">
+                            <div class="multi-cast-row">
+                                <div class="multi-horse-number">${row.uma_number}</div>
+                                <div class="multi-cast-name">${row.cast_name}</div>
+                            </div>
+                            <div class="multi-uma-name">${cleanName}役</div>
+                        </div>
+                    `;
+                });
+                multiHtml += `</div>`;
+                bkNameArea.innerHTML = multiHtml;
+
+                // バリデーション回避用（isMulti時は一時的にダミーIDを作成）
+                const dummyCast = document.createElement('div');
+                dummyCast.id = 'bkCast'; dummyCast.textContent = firstData.cast_name;
+                const dummyName = document.createElement('div');
+                dummyName.id = 'bkName'; dummyName.textContent = firstData.uma_name;
+                dummyCast.style.display = 'none'; dummyName.style.display = 'none';
+                bkNameArea.appendChild(dummyCast);
+                bkNameArea.appendChild(dummyName);
+
+            } else {
+                // 単一馬券（応援馬券など）の場合
+                const fontSize = firstData.cast_name.length > 8 ? '2.4rem' : '3.2rem';
+                bkNameArea.innerHTML = `
+                    <div class="bk-cast-row">
+                        <div id="bkNumber" class="bk-horse-number bk-tall">${firstData.uma_number}</div>
+                        <div id="bkCast" class="bk-cast-name bk-tall" style="font-size: ${fontSize};">${firstData.cast_name}</div>
+                    </div>
+                    <div id="bkName" class="bk-uma-name bk-tall">${cleanUmaName}役</div>
+                `;
+            }
+
+            const rightCol = document.querySelector('.bk-right-col');
+            if (rightCol) {
+                // 連続で発券した時に透かしが重なって濃くならないよう、前回追加した透かしがあれば一旦リセットする
+                const existingWatermarks = rightCol.querySelectorAll('.watermark-text');
+                existingWatermarks.forEach(el => el.remove());
+
+                // IcoMoonで割り当てた文字（例：'A'）を並べたテキストを作成
+                const patternText = 'AAA<br>AAA<br>AAA';
+
+                const watermark1 = document.createElement('div');
+                watermark1.className = 'watermark-text watermark-layer1';
+                watermark1.innerHTML = patternText;
+
+                const watermark2 = document.createElement('div');
+                watermark2.className = 'watermark-text watermark-layer2';
+                watermark2.innerHTML = patternText;
+
+                // 右カラムに透かしテキストを追加
+                rightCol.appendChild(watermark1);
+                rightCol.appendChild(watermark2);
+            }
+
+            const bakenDOM = document.getElementById('bakenSlip');
+
+            try {
+                const _0xV = (function (_0x1, _0x2, _0x3, _0x4) {
+                    const _0xN = allCastData.some(r => r.cast_name === _0x1 && (r.uma_name.replace('役', '').trim() + '役') === _0x2);
+                    const _0xB = [
+                        atob('ODEw'),
+                        atob('ODI5'),
+                        atob('ODM0'),
+                        atob('Mzk2'),
+                        atob('NDI5'),
+                        atob('MTE0NTE0'),
+                        atob('MTkxOQ=='),
+                        atob('NDU0NQ==')
+                    ];
+
+                    const _0xI = _0xB.some(x => _0x3.includes(x) || _0x4.includes(x));
+                    return _0xN && !_0xI;
+                })(
+                    document.getElementById(atob('YmtDYXN0')).textContent,
+                    document.getElementById(atob('YmtOYW1l')).textContent,
+                    document.getElementById(atob('YmtWYWw=')).textContent,
+                    document.getElementById(atob('YmtUb3RhbFZhbA==')).textContent
+                );
+
+                if (!_0xV) {
+                    shareModal.classList.remove('show');
+                    showToast('エラー：不正な値が検出されました。');
+                    return;
+                }
+
+                // html2canvasで撮影
+                const canvas = await html2canvas(bakenDOM, {
+                    scale: 3,
+                    backgroundColor: '#ffffff',
+                    useCORS: true,
+                    logging: false
+                });
+                const imgDataUrl = canvas.toDataURL('image/png');
+
+                // プレビュー表示
+                shareImagePreview.src = imgDataUrl;
+                shareImageLoading.style.display = 'none';
+                shareImagePreview.style.display = 'block';
+
+                // 複数人か単一かで名前のテキストを生成
+                let castNamesText = "";
+                if (isMulti) {
+                    castNamesText = data.map(row => `${row.cast_name}さん`).join('・');
+                } else {
+                    castNamesText = `${firstData.cast_name}さん`;
+                }
+
+                const tweetText = `有明アリーナ ウマ娘7th EVENT\n推しバ券を発券しました！\n\n${castNamesText}、がんばれ！\n\n#ウマ娘7th #推しバ券メーカー\nhttps://nyaftama.github.io/uma7th-ouen-baken/`;
+                document.getElementById('shareTwitterBtn').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+
+                if (!isReissue) {
+                    saveHistory(betType, data, amount, totalAmount);
+                }
+
+                shareModal.classList.add('show');
+
+            } catch (error) {
+                console.error('画像生成エラー:', error);
+                shareImageLoading.innerText = '推しバ券の生成に失敗しました。';
+            }
+        }
+
+        // =========================================
+        // 発券履歴と印刷（トンボ付きPDF出力）の処理
+        // =========================================
+        const HISTORY_KEY = 'uma_baken_history';
+
+        // 履歴の保存（ボックス買いを見据えて combinations 配列として保存）
+        function saveHistory(betType, data, amount, totalAmount) {
+            let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            const newEntry = {
+                id: 'baken_' + Date.now(),
+                date: new Date().toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                betType: betType,
+                combinations: [data], // 将来ボックス買いの時は [data1, data2...] となる
+                amount: amount,
+                totalAmount: totalAmount
+            };
+            history.unshift(newEntry);
+
+            // 最大8枚になるように古いものを削除
+            let totalTickets = 0;
+            const trimmedHistory = [];
+            for (const entry of history) {
+                if (totalTickets + entry.combinations.length <= 8) {
+                    trimmedHistory.push(entry);
+                    totalTickets += entry.combinations.length;
+                } else {
+                    break;
+                }
+            }
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(trimmedHistory));
+        }
+
+        // 履歴モーダルの表示
+        const historyModal = document.getElementById('historyModal');
+        const historyList = document.getElementById('historyList');
+
+        document.getElementById('historyBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            renderHistoryList();
+            historyModal.classList.add('show');
+        });
+
+        document.getElementById('closeHistoryBtn').addEventListener('click', () => {
+            historyModal.classList.remove('show');
+        });
+
+        function renderHistoryList() {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            historyList.innerHTML = '';
+
+            if (history.length === 0) {
+                historyList.innerHTML = '<div style="color: #888; text-align: center; padding: 20px;">履歴がありません</div>';
+                return;
+            }
+
+            history.forEach(entry => {
+                let nameStr = '';
+                if (Array.isArray(entry.combinations[0])) {
+                    nameStr = entry.combinations[0].map(r => r.cast_name).join('・');
+                } else {
+                    nameStr = entry.combinations[0].cast_name;
+                }
+
+                let typeStr = '';
+                if (entry.betType === 'tansho') typeStr = '単勝';
+                else if (entry.betType === 'ouen') typeStr = '応援(単＋複)';
+                else if (entry.betType === 'umaren') typeStr = 'ウマ連';
+                else if (entry.betType === 'sanrenpuku') typeStr = '3連複';
+
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <button class="history-del-btn" data-id="${entry.id}">削除</button>
+                    
+                    <div class="history-info" style="margin-left: 5px;">
+                        <div class="history-date" style="display: flex; align-items: center; gap: 10px;">
+                            <span>${entry.date} 発券</span>
+                            <a href="#" class="history-reissue-link" data-id="${entry.id}" style="color: var(--primary-color); font-weight: bold; text-decoration: underline; font-size: inherit;">再発券</a>
+                        </div>
+                        <div class="history-title">${typeStr}：${nameStr}</div>
+                    </div>
+                    
+                    <label class="history-checkbox-wrapper">
+                        <input type="checkbox" class="history-checkbox" value="${entry.id}">
+                        <div class="custom-checkbox"></div>
+                    </label>
+                `;
+                historyList.appendChild(div);
+            });
+
+            document.querySelectorAll('.history-del-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.getAttribute('data-id');
+                    let hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+                    hist = hist.filter(h => h.id !== id);
+                    localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+                    renderHistoryList();
+                });
+            });
+
+            document.querySelectorAll('.history-reissue-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const id = e.target.getAttribute('data-id');
+                    const hist = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+                    const targetEntry = hist.find(h => h.id === id);
+
+                    if (targetEntry) {
+                        historyModal.classList.remove('show');
+                        generateTicket(targetEntry.combinations[0], targetEntry.amount, targetEntry.betType, true);
+                    }
+                });
+            });
+        }
+
+        // 「すべて選択」をトグルボタン化
+        let isAllSelected = false;
+        document.getElementById('selectAllHistoryBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            isAllSelected = !isAllSelected;
+            document.querySelectorAll('.history-checkbox').forEach(cb => cb.checked = isAllSelected);
+        });
+
+        document.getElementById('deleteAllHistoryBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+
+            // 履歴が空の場合は何もしない
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            if (history.length === 0) {
+                showToast('削除する履歴がありません。');
+                return;
+            }
+
+            // 誤操作防止の確認アラートを出す
+            if (confirm('すべての発券履歴を削除しますか？\n（この操作は取り消せません）')) {
+                localStorage.removeItem(HISTORY_KEY);
+                renderHistoryList();
+                showToast('すべての履歴を削除しました。');
+            }
+        });
+
+        // 印刷ボタンの処理
+        document.getElementById('printSelectedBtn').addEventListener('click', async () => {
+            const selectedIds = Array.from(document.querySelectorAll('.history-checkbox:checked')).map(cb => cb.value);
+            if (selectedIds.length === 0) {
+                showToast('印刷用PDFに含めるバ券を選択してください');
+                return;
+            }
+
+            const printBtn = document.getElementById('printSelectedBtn');
+            printBtn.disabled = true;
+            printBtn.textContent = 'PDF生成中...';
+
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            const printTargets = history.filter(h => selectedIds.includes(h.id));
+
+            // ★ 追加 1：生成するバ券の「総枚数」をあらかじめ計算しておく
+            let totalTickets = 0;
+            printTargets.forEach(target => {
+                totalTickets += target.combinations.length;
+            });
+            let processedTickets = 0;
+
+            // ★ 変更：初期表示を0%にし、途中で消えないよう表示時間を極端に長く(99999ms)しておく
+            showToast(`PDFデータを生成しています... (0%)`, 99999);
+
+            const imageUrls = [];
+            const bakenDOM = document.getElementById('bakenSlip');
+
+            try {
+                for (const target of printTargets) {
+                    for (const comboData of target.combinations) {
+
+                        // =========================================================
+                        // ここから generateTicket と全く同じDOM構築処理を実行
+                        // =========================================================
+                        const isMulti = Array.isArray(comboData);
+                        const firstData = isMulti ? comboData[0] : comboData;
+
+                        const cleanUmaName = (firstData.uma_name || '').replace('役', '').trim();
+
+                        const dateParts = firstData.event_date.split('/');
+                        const year = dateParts[0];
+                        const month = parseInt(dateParts[1], 10);
+                        const day = parseInt(dateParts[2], 10);
+
+                        document.getElementById('bkDate').textContent = `${year}年${month}月${day}日`;
+                        document.getElementById('bkDay').textContent = firstData.day;
+
+                        const now = new Date();
+                        const issueMonth = now.getMonth() + 1;
+                        const issueDate = now.getDate();
+                        document.getElementById('bkIssueDate').textContent = `${issueMonth}月${issueDate}日`;
+
+                        const bkBetTypeBox = document.getElementById('bkBetTypeBox');
+                        const bkMessage = document.getElementById('bkMessage');
+                        const bkNameArea = document.getElementById('bkNameArea');
+
+                        let totalAmount = target.amount;
+                        const betType = target.betType;
+
+                        if (betType === 'umaren') {
+                            bkBetTypeBox.innerHTML = `<div class="bk-small-en">QUINELLA</div><div class="bk-vert-text" style="margin: 15px 0;">ウマ連</div>`;
+                            bkMessage.style.display = 'none';
+                        } else if (betType === 'sanrenpuku') {
+                            bkBetTypeBox.innerHTML = `<div class="bk-small-en">TRIO</div><div class="bk-vert-text" style="margin: 15px 0;">３連複</div>`;
+                            bkMessage.style.display = 'none';
+                        } else if (betType === 'tansho') {
+                            bkBetTypeBox.innerHTML = `<div class="bk-small-en">WIN</div><div class="bk-vert-text" style="margin: 15px 0;">単<br>勝</div>`;
+                            bkMessage.style.display = 'block';
+                            bkMessage.textContent = '激推し';
+                            totalAmount = target.amount;
+                        } else {
+                            bkBetTypeBox.innerHTML = `<div class="bk-small-en">WIN</div><div class="bk-vert-text">単<br>勝</div><div class="bk-plus">＋</div><div class="bk-vert-text">複<br>勝</div><div class="bk-small-en">PLACE<br>SHOW</div>`;
+                            bkMessage.style.display = 'block';
+                            bkMessage.textContent = 'がんばれ！';
+                            totalAmount = target.amount * 2;
+                        }
+
+                        const getStars = (val, isTotal) => {
+                            const char = isTotal ? '★' : '☆';
+                            const targetLength = isTotal ? 7 : 6;
+                            const starCount = Math.max(0, targetLength - val.toString().length);
+                            return char.repeat(starCount);
+                        };
+
+                        document.getElementById('bkVal').textContent = target.amount;
+
+                        const amountRow = document.querySelector('.bk-amount-row');
+                        const totalRow = document.querySelector('.bk-total-row');
+
+                        if (isMulti) {
+                            if (amountRow) {
+                                amountRow.style.transform = 'scale(0.85)';
+                                amountRow.style.transformOrigin = 'right bottom';
+                                amountRow.style.marginBottom = '-10px';
+                            }
+                            if (totalRow) {
+                                totalRow.style.transform = 'scale(0.85)';
+                                totalRow.style.transformOrigin = 'right bottom';
+                            }
+                        } else {
+                            if (amountRow) {
+                                amountRow.style.transform = 'none';
+                                amountRow.style.marginBottom = '5px';
+                            }
+                            if (totalRow) totalRow.style.transform = 'none';
+                        }
+
+                        document.getElementById('bkStarsSub').textContent = getStars(target.amount, false);
+                        document.getElementById('bkTotalVal').textContent = totalAmount;
+                        document.getElementById('bkStarsTotal').textContent = getStars(totalAmount, true);
+
+                        if (isMulti) {
+                            let multiHtml = `<div class="multi-names-container">`;
+                            comboData.forEach(row => {
+                                const cleanName = (row.uma_name || '').replace('役', '').trim();
+                                multiHtml += `
+                                    <div class="multi-name-block">
+                                        <div class="multi-cast-row">
+                                            <div class="multi-horse-number">${row.uma_number}</div>
+                                            <div class="multi-cast-name">${row.cast_name}</div>
+                                        </div>
+                                        <div class="multi-uma-name">${cleanName}役</div>
+                                    </div>
+                                `;
+                            });
+                            multiHtml += `</div>`;
+                            bkNameArea.innerHTML = multiHtml;
+
+                            // ダミー要素の追加も通常生成と同様に合わせる
+                            const dummyCast = document.createElement('div');
+                            dummyCast.id = 'bkCast'; dummyCast.textContent = firstData.cast_name;
+                            const dummyName = document.createElement('div');
+                            dummyName.id = 'bkName'; dummyName.textContent = firstData.uma_name;
+                            dummyCast.style.display = 'none'; dummyName.style.display = 'none';
+                            bkNameArea.appendChild(dummyCast);
+                            bkNameArea.appendChild(dummyName);
+
+                        } else {
+                            const fontSize = firstData.cast_name.length > 8 ? '2.4rem' : '3.2rem';
+                            bkNameArea.innerHTML = `
+                                <div class="bk-cast-row">
+                                    <div id="bkNumber" class="bk-horse-number bk-tall">${firstData.uma_number}</div>
+                                    <div id="bkCast" class="bk-cast-name bk-tall" style="font-size: ${fontSize};">${firstData.cast_name}</div>
+                                </div>
+                                <div id="bkName" class="bk-uma-name bk-tall">${cleanUmaName}役</div>
+                            `;
+                        }
+
+                        const rightCol = document.querySelector('.bk-right-col');
+                        if (rightCol) {
+                            const existingWatermarks = rightCol.querySelectorAll('.watermark-text');
+                            existingWatermarks.forEach(el => el.remove());
+
+                            const patternText = 'AAA<br>AAA<br>AAA';
+                            const watermark1 = document.createElement('div');
+                            watermark1.className = 'watermark-text watermark-layer1';
+                            watermark1.innerHTML = patternText;
+
+                            const watermark2 = document.createElement('div');
+                            watermark2.className = 'watermark-text watermark-layer2';
+                            watermark2.innerHTML = patternText;
+
+                            rightCol.appendChild(watermark1);
+                            rightCol.appendChild(watermark2);
+                        }
+
+                        await new Promise(resolve => setTimeout(resolve, 150));
+
+                        const canvas = await html2canvas(bakenDOM, {
+                            scale: 3,
+                            backgroundColor: '#ffffff',
+                            useCORS: true,
+                            logging: false
+                        });
+                        imageUrls.push(canvas.toDataURL('image/jpeg', 0.85));
+
+                        processedTickets++;
+                        const percent = Math.floor((processedTickets / totalTickets) * 100);
+                        showToast(`PDFデータを生成しています... (${percent}%)`, 99999);
+                    }
+                }
+
+                showToast('PDFファイルを出力しています...', 99999);
+
+            } catch (e) {
+                console.error(e);
+                showToast('PDFの生成に失敗しました。');
+            } finally {
+                printBtn.disabled = false;
+                printBtn.textContent = 'PDF保存';
+            }
+
+            if (imageUrls.length > 0) {
+                generateAndDownloadPDF(imageUrls);
+            }
+        });
+
+        // PDFを生成しダウンロード
+        function generateAndDownloadPDF(images) {
+            // jsPDFを初期化 (A4縦、単位はミリメートル)
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+            const ticketW = 85;
+            const ticketH = 54;
+            const gapX = 15; // 横の隙間
+            const gapY = 15; // 縦の隙間
+            const startX = (210 - (ticketW * 2 + gapX)) / 2; // A4幅(210)の中央に配置(12.5mm)
+            const startY = 20;
+
+            let currentX = startX;
+            let currentY = startY;
+            let countOnPage = 0;
+
+            images.forEach((imgSrc) => {
+                // 1ページに8枚（2列×4段）まで。それ以上は新しいページを追加
+                if (countOnPage >= 8) {
+                    doc.addPage();
+                    currentX = startX;
+                    currentY = startY;
+                    countOnPage = 0;
+                }
+
+                // トンボ（トリムマーク）の描画
+                doc.setDrawColor(0); // 黒色
+                doc.setLineWidth(0.2); // 極細の線
+                const x = currentX;
+                const y = currentY;
+
+                // 左上のトンボ
+                doc.line(x - 4, y, x, y);
+                doc.line(x, y - 4, x, y);
+                // 右上のトンボ
+                doc.line(x + ticketW, y, x + ticketW + 4, y);
+                doc.line(x + ticketW, y - 4, x + ticketW, y);
+                // 左下のトンボ
+                doc.line(x - 4, y + ticketH, x, y + ticketH);
+                doc.line(x, y + ticketH, x, y + ticketH + 4);
+                // 右下のトンボ
+                doc.line(x + ticketW, y + ticketH, x + ticketW + 4, y + ticketH);
+                doc.line(x + ticketW, y + ticketH, x + ticketW, y + ticketH + 4);
+
+                // 画像の配置 (アスペクト比を無視して 85x54mm に強制変形)
+                doc.addImage(imgSrc, 'JPEG', x, y, ticketW, ticketH);
+
+                countOnPage++;
+                // 2列に並べるための座標計算
+                if (countOnPage % 2 === 1) {
+                    currentX += ticketW + gapX; // 次は右の列へ
+                } else {
+                    currentX = startX;          // 次は左の列に戻る
+                    currentY += ticketH + gapY; // 次の行へ下がる
+                }
+            });
+
+            // PDFファイルとして直接保存（iPhoneの場合はダウンロード確認が出ます）
+            doc.save('oshi_baken.pdf');
+            showToast('PDFのダウンロードが完了しました！');
+        }
+
+        document.getElementById('shareCloseBtn').addEventListener('click', () => {
+            shareModal.classList.remove('show');
+        });
+
+        // カート用イベントの紐付け
+        const updateCartQty = (newAmount) => {
+            if (newAmount < 100) newAmount = 100;
+            cartAmount = newAmount;
+            document.getElementById('cartQtySpan').textContent = cartAmount;
+
+            const isReady = cartItems.length >= 2;
+            document.getElementById('cartMinusBtn').disabled = !isReady || cartAmount <= 100;
+            document.getElementById('cartMinus1000Btn').disabled = !isReady || cartAmount <= 100;
+        };
+
+        // 長押し対応でカートの増減ボタンをセット
+        setupLongPress(document.getElementById('cartMinusBtn'), () => updateCartQty(cartAmount - 100));
+        setupLongPress(document.getElementById('cartPlusBtn'), () => updateCartQty(cartAmount + 100));
+        setupLongPress(document.getElementById('cartMinus1000Btn'), () => updateCartQty(cartAmount - 1000));
+        setupLongPress(document.getElementById('cartPlus1000Btn'), () => updateCartQty(cartAmount + 1000));
+
+        // カートの発券ボタンのイベント
+        document.getElementById('cartIssueBtn').addEventListener('click', () => {
+            const betType = cartItems.length === 2 ? 'umaren' : 'sanrenpuku';
+            generateTicket(cartItems, cartAmount, betType);
+        });
+
+        // 発券結果モーダルから「発券履歴・印刷」画面へ移動する処理
+        document.getElementById('openHistoryFromShare').addEventListener('click', (e) => {
+            e.preventDefault();
+            shareModal.classList.remove('show');
+            renderHistoryList();
+            historyModal.classList.add('show');
+        });
+    </script>
+
+</body>
+
+</html>
